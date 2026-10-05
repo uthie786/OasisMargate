@@ -7,10 +7,76 @@ const jakarta = Plus_Jakarta_Sans({
   display: "swap",
 });
 
+/* ---------- SEO ----------
+   SITE_URL comes from Vercel automatically (your production domain, or the
+   .vercel.app address until you add a custom domain). */
+const SITE_URL = process.env.VERCEL_PROJECT_PRODUCTION_URL
+  ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
+  : undefined;
+const SEO_TITLE = "Oasis Lodge Margate | Hotel & Accommodation, KZN South Coast";
+const SEO_DESCRIPTION =
+  "Oasis Lodge in Margate: air-conditioned hotel rooms and self-catering apartments on Marine Drive, with a pool, braai areas, free Wi-Fi, secure parking, a conference centre and the Oasis Rooftop Car Wash.";
+
+const ADDRESS_LD = {
+  "@type": "PostalAddress",
+  streetAddress: "99 Marine Drive, Lawrence Rocks",
+  addressLocality: "Margate",
+  addressRegion: "KwaZulu-Natal",
+  postalCode: "4275",
+  addressCountry: "ZA",
+};
+const STRUCTURED_DATA = {
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Hotel",
+      "@id": SITE_URL ? `${SITE_URL}/#lodge` : "#lodge",
+      name: "Oasis Lodge",
+      alternateName: ["Oasis Lodge Margate", "Oasis Hotels, Lodges & Resorts Margate"],
+      description: SEO_DESCRIPTION,
+      ...(SITE_URL && { url: SITE_URL }),
+      telephone: "+27824167891",
+      address: ADDRESS_LD,
+      areaServed: ["Margate", "KZN South Coast"],
+      sameAs: ["https://share.google/RLwKPmKPM0NIcsvkV"],
+      amenityFeature: [
+        "Outdoor swimming pool",
+        "Braai areas",
+        "Free Wi-Fi",
+        "Secure parking",
+        "Air-conditioning",
+        "Conference centre",
+        "Self-catering apartments",
+      ].map((name) => ({ "@type": "LocationFeatureSpecification", name, value: true })),
+    },
+    {
+      "@type": "AutoWash",
+      name: "Oasis Rooftop Car Wash",
+      alternateName: ["Oasis Rooftop Carwash", "Oasis Car Wash Margate"],
+      description: "Car wash on the premises of Oasis Lodge in Margate, KZN South Coast.",
+      ...(SITE_URL && { url: `${SITE_URL}/#amenities` }),
+      telephone: "+27824167891",
+      address: ADDRESS_LD,
+      parentOrganization: { "@id": SITE_URL ? `${SITE_URL}/#lodge` : "#lodge" },
+    },
+  ],
+};
+
 export const metadata = {
-  title: "Oasis Lodge | Coastal accommodation in Margate, KZN South Coast",
-  description:
-    "Oasis Lodge at Lawrence Rocks, Margate. Air-conditioned rooms, self-catering units and family suites with a pool, braai areas, free Wi-Fi, secure parking, events and conferencing, and the Oasis Rooftop Car Wash.",
+  ...(SITE_URL && { metadataBase: new URL(SITE_URL), alternates: { canonical: "/" } }),
+  title: SEO_TITLE,
+  description: SEO_DESCRIPTION,
+  applicationName: "Oasis Lodge Margate",
+  robots: { index: true, follow: true },
+  openGraph: {
+    type: "website",
+    locale: "en_ZA",
+    siteName: "Oasis Lodge Margate",
+    title: SEO_TITLE,
+    description: SEO_DESCRIPTION,
+    ...(SITE_URL && { url: SITE_URL }),
+  },
+  twitter: { card: "summary", title: SEO_TITLE, description: SEO_DESCRIPTION },
   icons: {
     icon: "data:image/png;base64,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",
   },
@@ -548,6 +614,10 @@ export default async function RootLayout({ children }) {
     <html lang="en-ZA" className={jakarta.variable} suppressHydrationWarning>
       <head>
         <script dangerouslySetInnerHTML={{ __html: "document.documentElement.classList.add('js')" }} />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(STRUCTURED_DATA).replace(/</g, "\u003c") }}
+        />
         <style dangerouslySetInnerHTML={{ __html: css }} />
       </head>
       <body>
