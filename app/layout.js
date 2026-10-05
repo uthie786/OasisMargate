@@ -227,9 +227,10 @@ button{font:inherit;cursor:pointer;border:0;background:none;color:inherit}
 .c-row small{display:block;color:var(--muted);font-size:.82rem;font-weight:600}
 .c-row strong,.c-row a{font-size:1.06rem;font-weight:700;color:var(--earth);line-height:1.45}
 .c-row a:hover{color:var(--sunset-d)}
+.c-note{display:block;margin-top:2px;font-size:.86rem;color:var(--muted);line-height:1.45}
 .c-actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:auto;padding-top:6px}
 .map-frame{display:flex}
-.map{position:relative;flex:1;min-height:400px;border-radius:24px 20px 26px 18px;overflow:hidden;background:#F3E1C4}
+.map{position:relative;flex:1;min-height:420px;border-radius:24px 20px 26px 18px;overflow:hidden;background:#F3E1C4}
 .map > svg{position:absolute;inset:0;width:100%;height:100%}
 .map-note{position:absolute;left:16px;top:16px;padding:8px 14px;border-radius:999px;background:rgba(255,251,244,.9);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);font-size:.82rem;font-weight:700;color:var(--sunset-d)}
 .map .btn{position:absolute;right:16px;bottom:16px}
@@ -392,6 +393,10 @@ kbd{font-family:inherit;font-size:.8rem;font-weight:700;padding:1px 7px;border-r
   .nav-cta .btn{padding:11px 16px;font-size:.9rem}
   .brand{font-size:1rem}
   .hotel-grid,.units,.ex-grid{grid-template-columns:1fr}
+  .map{min-height:0;display:flex;flex-direction:column}
+  .map > svg{position:relative;inset:auto;height:auto;aspect-ratio:520/390}
+  .map-note{display:none}
+  .map .btn{position:static;margin:4px 12px 12px}
   .group-cta,.gallery-inner{grid-template-columns:1fr;padding:24px}
   .tabs{display:flex;border-radius:22px}
   .tabs button{flex:1;justify-content:center;padding:10px 12px}
