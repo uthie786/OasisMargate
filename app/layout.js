@@ -103,7 +103,7 @@ button{font:inherit;cursor:pointer;border:0;background:none;color:inherit}
 .mesh{position:absolute;inset:0;background-image:radial-gradient(rgba(122,70,40,.16) 1px,transparent 1.2px);background-size:26px 26px;-webkit-mask-image:linear-gradient(180deg,#000,transparent 75%);mask-image:linear-gradient(180deg,#000,transparent 75%)}
 .hero-grid{position:relative;z-index:2;display:grid;grid-template-columns:1.12fr .88fr;gap:clamp(36px,6vw,84px);align-items:center}
 .hero-where{display:inline-flex;align-items:center;gap:8px;padding:8px 16px 8px 10px;border-radius:999px;background:rgba(255,251,244,.75);border:1px solid rgba(236,212,166,.9);color:var(--sunset-d);font-weight:600;font-size:.9rem;-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}
-.hero h1{margin-top:22px;font-size:clamp(2.8rem,6.6vw,5.4rem);line-height:.98;letter-spacing:-.045em;font-weight:800;max-width:11ch;background:linear-gradient(120deg,var(--earth) 25%,var(--sunset-d) 100%);-webkit-background-clip:text;background-clip:text;color:transparent;padding-bottom:.06em}
+.hero h1{margin-top:22px;font-size:clamp(2.8rem,6.6vw,5.4rem);line-height:1.02;letter-spacing:-.045em;font-weight:800;max-width:11ch;background:linear-gradient(120deg,var(--earth) 25%,var(--sunset-d) 100%);-webkit-background-clip:text;background-clip:text;color:transparent;padding-bottom:.18em;margin-bottom:-.12em}
 .hero-sub{margin-top:22px;font-size:clamp(1.05rem,1.5vw,1.18rem);color:var(--muted);max-width:35rem}
 .hero-actions{margin-top:32px;display:flex;flex-wrap:wrap;gap:12px}
 .quick{margin-top:34px;display:flex;flex-wrap:wrap;gap:12px}
