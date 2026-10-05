@@ -172,7 +172,7 @@ export default function Page() {
           <div className="wrap hero-grid">
             <div>
               <span className="hero-where rise d1">
-                <Icon name="pin" size={18} /> Lawrence Rocks, Margate on the KZN South Coast
+                <Icon name="pin" size={18} /> Oasis Lodge, Lawrence Rocks, Margate
               </span>
               <h1 className="rise d2">Your Coastal Escape in Margate</h1>
               <p className="hero-sub rise d3">
@@ -287,7 +287,7 @@ export default function Page() {
               <span className="ai"><Icon name="car" size={32} /></span>
               <div>
                 <h3>Oasis Rooftop Car Wash</h3>
-                <p>Right here on the premises. Get the salt spray and beach sand washed off before the drive home.</p>
+                <p>Margate’s rooftop car wash, right here on the premises. Get the salt spray and beach sand washed off before the drive home.</p>
               </div>
               <a className="btn btn-light" href={wa("Hi, I'd like to ask about the Oasis Rooftop Car Wash.")} target="_blank" rel="noopener noreferrer">
                 Ask about a wash
@@ -302,7 +302,7 @@ export default function Page() {
             <div className="section-head reveal">
               <h2>Hotel rooms and apartments</h2>
               <p>
-                Eight hotel rooms for couples, friends and business travellers, and three apartments with full kitchens for families and
+                Accommodation in Margate for every kind of stay: eight hotel rooms for couples, friends and business travellers, and three apartments with full kitchens for families and
                 longer stays. Mention the room or unit number when you book.
               </p>
             </div>
