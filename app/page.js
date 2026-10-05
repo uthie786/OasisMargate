@@ -8,7 +8,8 @@ const PHONE_TEL = "tel:+27824167891";
 const ADDRESS = "99 Marine Drive, Lawrence Rocks, Margate, 4275";
 const wa = (msg) => `https://wa.me/27824167891?text=${encodeURIComponent(msg)}`;
 const GOOGLE_PROFILE = "https://share.google/RLwKPmKPM0NIcsvkV";
-const MAPS = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(ADDRESS)}`;
+const GATE_ADDRESS = "6 Homestead Rd, Margate, 4275";
+const MAPS = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(GATE_ADDRESS)}`;
 
 const NAV = [
   { id: "home", label: "Home" },
@@ -451,16 +452,17 @@ export default function Page() {
           <div className="wrap">
             <div className="section-head reveal">
               <h2>Find us on Marine Drive</h2>
-              <p>We’re at Lawrence Rocks in Margate. Call or send a WhatsApp and we’ll confirm availability and directions.</p>
+              <p>Drive in through our main gate at 6 Homestead Rd. On Marine Drive, staying guests can walk in and out through the guest gate with their key.</p>
             </div>
 
             <div className="contact-grid">
               <div className="contact-card reveal">
                 <div className="c-row">
-                  <span className="ai"><Icon name="pin" size={22} /></span>
+                  <span className="ai deep"><Icon name="parking" size={22} /></span>
                   <div>
-                    <small>Address</small>
-                    <strong>99 Marine Drive, Lawrence Rocks,<br />Margate, 4275</strong>
+                    <small>Car entrance (main gate)</small>
+                    <strong>6 Homestead Rd, Margate, 4275</strong>
+                    <span className="c-note">Use this address in your GPS. Secure parking for guests inside the gate.</span>
                   </div>
                 </div>
                 <div className="c-row">
@@ -471,10 +473,11 @@ export default function Page() {
                   </div>
                 </div>
                 <div className="c-row">
-                  <span className="ai deep"><Icon name="parking" size={22} /></span>
+                  <span className="ai"><Icon name="pin" size={22} /></span>
                   <div>
-                    <small>Arriving by car</small>
-                    <strong>Secure on-site parking for guests</strong>
+                    <small>Street address</small>
+                    <strong>99 Marine Drive, Lawrence Rocks, Margate</strong>
+                    <span className="c-note">Guest gate at the bottom of the property: entrance and exit on foot only, key required. Cars use the main gate on Homestead Rd.</span>
                   </div>
                 </div>
                 <div className="c-actions">
@@ -486,9 +489,9 @@ export default function Page() {
               <div className="stone-frame map-frame reveal" style={{ transitionDelay: ".1s" }}>
               <div className="map">
                 <MapScene />
-                <span className="map-note">Lawrence Rocks, Margate</span>
+                <span className="map-note">Cars enter from Homestead Rd</span>
                 <a className="btn btn-light" href={MAPS} target="_blank" rel="noopener noreferrer">
-                  <Icon name="pin" size={18} /> Get directions
+                  <Icon name="pin" size={18} /> Directions to the gate
                 </a>
               </div>
               </div>
@@ -550,6 +553,7 @@ export default function Page() {
             </ul>
             <ul>
               <li>{ADDRESS}</li>
+              <li>Main gate: {GATE_ADDRESS}</li>
               <li><a href={PHONE_TEL}>{PHONE_DISPLAY}</a></li>
               <li><a href={wa("Hi Oasis Lodge!")} target="_blank" rel="noopener noreferrer">WhatsApp us</a></li>
             </ul>
@@ -665,56 +669,148 @@ function PostcardScene() {
 }
 
 function MapScene() {
-  const drive = "M330 -10 C360 110 350 210 380 300 S420 380 430 420";
-  const shore = "M410 -10 C440 110 430 200 460 290 S500 380 510 420";
+  // Zoom in on the property on small screens so the labels stay readable.
+  const [narrow, setNarrow] = useState(false);
+  useEffect(() => {
+    const mq = window.matchMedia("(max-width: 640px)");
+    const on = () => setNarrow(mq.matches);
+    on();
+    mq.addEventListener("change", on);
+    return () => mq.removeEventListener("change", on);
+  }, []);
+  const homestead = "M-80 332 L400 -71";
+  const marine = "M355 480 L545 -70";
+  const premises = "M272 53 L392 76 L412 21 L490 45 L378 367 L96 263 L121 176 Z";
   return (
-    <svg viewBox="0 0 600 420" preserveAspectRatio="xMidYMid slice" role="img" aria-label="Stylised map showing Oasis Lodge on Marine Drive beside Lawrence Rocks, Margate">
+    <svg
+      viewBox={narrow ? "0 10 520 390" : "0 0 600 420"}
+      preserveAspectRatio="xMidYMid meet"
+      style={{ overflow: "visible" }}
+      role="img"
+      aria-label="Map of the Oasis Lodge premises. Cars enter through the main gate at 6 Homestead Road. The front of the building faces Marine Drive at number 99, where a guest gate at the southern corner is for entering and leaving on foot only, with a key. The rooftop car wash is on the north side of the property."
+    >
       <defs>
         <pattern id="mapGrid" width="28" height="28" patternUnits="userSpaceOnUse">
           <path d="M28 0H0V28" fill="none" stroke="#E6CDA8" strokeWidth="1" />
         </pattern>
-        <linearGradient id="mapOcean" x1="0" y1="0" x2="1" y2="0">
-          <stop offset="0" stopColor="#3A9DB4" />
-          <stop offset="1" stopColor="#1D5F7A" />
-        </linearGradient>
-        <path id="mapDrive" d={drive} />
+        <pattern id="washLanes" width="18" height="18" patternUnits="userSpaceOnUse" patternTransform="rotate(12)">
+          <rect width="18" height="18" fill="#E9D3B2" />
+          <path d="M0 9h10" stroke="#FFFBF4" strokeWidth="2" strokeDasharray="6 4" />
+        </pattern>
+        <marker id="routeArrow" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+          <path d="M0 0L10 5L0 10Z" fill="#E2691F" />
+        </marker>
+        <path id="hsLabel" d="M168 124 L330 -12" />
+        <path id="mdLabel" d="M456 190 L503 60" />
       </defs>
-      <rect width="600" height="420" fill="#F3E1C4" />
-      <rect width="600" height="420" fill="url(#mapGrid)" opacity=".8" />
-      <rect x="60" y="64" width="96" height="62" rx="18" fill="#D3E0B5" />
-      <rect x="178" y="262" width="112" height="70" rx="18" fill="#EBD3B0" />
-      <g stroke="#FFFBF4" strokeWidth="7" strokeLinecap="round">
-        <path d="M-10 150 L360 182" />
-        <path d="M40 -10 L120 430" />
-        <path d="M-10 305 L392 312" />
-        <path d="M200 -10 L232 430" />
+
+      {/* land and neighbouring blocks */}
+      <rect x="-400" y="-300" width="1400" height="1020" fill="#F3E1C4" />
+      <rect x="-400" y="-300" width="1400" height="1020" fill="url(#mapGrid)" opacity=".7" />
+      <g fill="#EAD5B5">
+        <rect x="18" y="28" width="96" height="60" rx="12" />
+        <rect x="150" y="-30" width="90" height="70" rx="12" />
+        <rect x="-10" y="150" width="70" height="56" rx="12" />
+        <rect x="-20" y="300" width="90" height="80" rx="12" />
+        <rect x="120" y="330" width="140" height="80" rx="12" transform="rotate(20 190 370)" />
+        <rect x="300" y="-40" width="90" height="56" rx="12" />
+        <rect x="455" y="130" width="120" height="80" rx="12" />
+        <rect x="430" y="330" width="150" height="76" rx="12" />
+        <rect x="520" y="10" width="90" height="90" rx="12" />
       </g>
-      <path d={drive} stroke="#DDB283" strokeWidth="19" fill="none" />
-      <path d={drive} stroke="#FFFBF4" strokeWidth="13" fill="none" />
+      <g fill="#D3E0B5">
+        <circle cx="70" cy="110" r="18" />
+        <circle cx="210" cy="10" r="14" />
+        <circle cx="30" cy="250" r="16" />
+      </g>
+
+      {/* roads */}
+      <path d={homestead} stroke="#DDB283" strokeWidth="30" fill="none" />
+      <path d={homestead} stroke="#FFFBF4" strokeWidth="24" fill="none" />
+      <path d={marine} stroke="#DDB283" strokeWidth="38" fill="none" />
+      <path d={marine} stroke="#FFFBF4" strokeWidth="32" fill="none" />
+      <path d={marine} stroke="#E6CDA8" strokeWidth="1.5" strokeDasharray="10 10" fill="none" />
       <text fontSize="11" fontWeight="700" fill="#7B5B48" dy="4">
-        <textPath href="#mapDrive" startOffset="12%">Marine Drive</textPath>
+        <textPath href="#hsLabel" startOffset="6%">Homestead Rd</textPath>
       </text>
-      <path d={`${shore} H610 V-10Z`} fill="url(#mapOcean)" />
-      <path d={shore} stroke="#FFF1D6" strokeWidth="4" fill="none" opacity=".85" strokeDasharray="2 10" strokeLinecap="round" />
-      <g stroke="#FFF1D6" strokeOpacity=".5" strokeWidth="2" fill="none" strokeLinecap="round">
-        <path d="M500 80c8-5 16-5 24 0s16 5 24 0" />
-        <path d="M530 170c8-5 16-5 24 0s16 5 24 0" />
-        <path d="M540 330c8-5 16-5 24 0s16 5 24 0" />
+      <text fontSize="11" fontWeight="700" fill="#7B5B48" dy="4">
+        <textPath href="#mdLabel" startOffset="10%">Marine Drive</textPath>
+      </text>
+
+      {/* premises */}
+      <path d={premises} fill="#FFF6E6" stroke="#E2691F" strokeWidth="2.5" strokeDasharray="7 5" strokeLinejoin="round" />
+
+      {/* garden and parking */}
+      <path d="M104 258 L118 196 C140 214 150 240 146 272Z" fill="#CFE0B5" />
+      <path d="M142 162 C162 188 176 212 196 252" stroke="#E8D3B4" strokeWidth="22" fill="none" strokeLinecap="round" />
+      <g fill="none" stroke="#C9A77F" strokeWidth="1.5">
+        <path d="M168 228l22-8M174 242l22-8M180 256l22-8" />
       </g>
-      <g fill="#4A2E1F">
-        <circle cx="470" cy="236" r="7" />
-        <circle cx="482" cy="244" r="5" />
-        <circle cx="475" cy="253" r="4" />
+      <text x="148" y="280" fontSize="10" fontWeight="700" fill="#7B5B48" transform="rotate(-20 148 280)">Parking</text>
+
+      {/* car wash (rooftop) */}
+      <path d="M201 118 L272 59 L400 78 L439 101 L434 168 L412 185 L328 162 L244 134Z" fill="url(#washLanes)" stroke="#C69A5D" strokeWidth="2" strokeLinejoin="round" />
+      <g transform="translate(300 98) rotate(10)">
+        <rect x="-15" y="-8" width="30" height="16" rx="6" fill="#2A86A6" />
+        <rect x="-7" y="-6" width="12" height="12" rx="3" fill="#A8DCEB" />
       </g>
-      <text x="494" y="232" fontSize="12" fontWeight="700" fill="#FFF6E6">Lawrence Rocks</text>
-      <circle className="pulse" cx="366" cy="226" r="14" fill="#E2691F" opacity=".55" />
-      <path d="M366 226c-10-12-15-20-15-28a15 15 0 0 1 30 0c0 8-5 16-15 28Z" fill="#D63A24" />
-      <circle cx="366" cy="198" r="5.5" fill="#FFF6E6" />
-      <rect x="220" y="182" width="124" height="32" rx="16" fill="#FFFBF4" stroke="rgba(91,52,30,.18)" />
-      <text x="282" y="203" fontSize="13" fontWeight="800" fill="#3B2416" textAnchor="middle">Oasis Lodge</text>
-      <g transform="translate(40 374)">
-        <circle r="18" fill="#FFFBF4" opacity=".92" />
-        <text y="5" fontSize="13" fontWeight="800" fill="#B4501A" textAnchor="middle">N</text>
+      <circle cx="338" cy="112" r="3" fill="#A8DCEB" />
+      <circle cx="346" cy="104" r="2" fill="#A8DCEB" />
+      <circle cx="350" cy="116" r="2.5" fill="#A8DCEB" />
+      <text x="322" y="146" fontSize="11.5" fontWeight="800" fill="#3B2416" textAnchor="middle" transform="rotate(12 322 146)">Rooftop Car Wash</text>
+
+      {/* pool */}
+      <rect x="244" y="168" width="40" height="22" rx="6" fill="#4FC1B8" stroke="#FFFBF4" strokeWidth="3" transform="rotate(-18 264 179)" />
+      <path d="M252 180c4-3 8-3 12 0s8 3 12 0" stroke="#FFFBF4" strokeWidth="1.5" fill="none" transform="rotate(-18 264 179)" />
+
+      {/* buildings */}
+      <path d="M222 206 L298 214 L290 300 L212 288Z" fill="#C8734A" stroke="#A65E3A" strokeWidth="2" strokeLinejoin="round" />
+      <path d="M222 206 L290 300M298 214 L212 288" stroke="#A65E3A" strokeWidth="1.2" opacity=".6" />
+      <text x="255" y="257" fontSize="10.5" fontWeight="800" fill="#FFF6E6" textAnchor="middle">Rooms</text>
+      <path d="M330 192 L425 198 L392 345 L318 322Z" fill="#B8653E" stroke="#8A4A2C" strokeWidth="2" strokeLinejoin="round" />
+      <path d="M377 195 L355 334" stroke="#8A4A2C" strokeWidth="1.2" opacity=".6" />
+      <text x="370" y="270" fontSize="12" fontWeight="800" fill="#FFF6E6" textAnchor="middle" transform="rotate(-77 370 270)">Oasis Lodge</text>
+
+      {/* pedestrian guest gate on Marine Drive (key required) */}
+      <circle className="pulse" cx="383" cy="357" r="11" fill="#2A86A6" opacity=".45" />
+      <g transform="translate(383 357) rotate(-71)">
+        <rect x="-11" y="-4" width="22" height="8" rx="2.5" fill="#A8DCEB" stroke="#1D5F7A" strokeWidth="1.5" />
+        <path d="M-5 -4v8M0 -4v8M5 -4v8" stroke="#1D5F7A" strokeWidth="1.1" />
+      </g>
+      {!narrow && <path d="M392 352 L440 324" stroke="#1D5F7A" strokeWidth="1.5" strokeDasharray="3 3" />}
+      <g transform={narrow ? "translate(206 340)" : "translate(430 280)"}>
+        <rect width="166" height="56" rx="16" fill="#FFFBF4" stroke="#2A86A6" strokeWidth="2" />
+        <g transform="translate(20 28)" fill="none" stroke="#1D5F7A" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+          <circle cx="1" cy="-10" r="2.4" fill="#1D5F7A" stroke="none" />
+          <path d="M0 -6 L-1 2 L-5 10M-1 2 L4 6 L5 11M-5 -2 L0 -5 L5 -1" />
+        </g>
+        <text x="36" y="20" fontSize="11.5" fontWeight="800" fill="#3B2416">99 Marine Drive</text>
+        <text x="36" y="34" fontSize="10" fontWeight="700" fill="#1D5F7A">Guest gate, on foot only</text>
+        <g transform="translate(36 41)">
+          <circle cx="4" cy="4" r="3" fill="none" stroke="#B4501A" strokeWidth="1.5" />
+          <path d="M7 4h7M12 4v3" stroke="#B4501A" strokeWidth="1.5" strokeLinecap="round" />
+          <text x="18" y="8" fontSize="10" fontWeight="700" fill="#B4501A">Key required</text>
+        </g>
+      </g>
+
+      {/* car route and main gate */}
+      <path d="M-10 270 L118 163" stroke="#E2691F" strokeWidth="3" strokeDasharray="2 7" strokeLinecap="round" fill="none" markerEnd="url(#routeArrow)" />
+      <circle className="pulse" cx="140" cy="160" r="14" fill="#E2691F" opacity=".55" />
+      <g transform="translate(140 160) rotate(-40)">
+        <rect x="-15" y="-5" width="30" height="10" rx="3" fill="#F2C94C" stroke="#3B2416" strokeWidth="1.5" />
+        <path d="M-9 -5v10M-3 -5v10M3 -5v10M9 -5v10" stroke="#3B2416" strokeWidth="1.2" />
+      </g>
+      <path d="M128 140 L104 124" stroke="#3B2416" strokeWidth="1.5" strokeDasharray="3 3" />
+      <g transform="translate(14 72)">
+        <rect width="132" height="52" rx="16" fill="#FFFBF4" stroke="#E2691F" strokeWidth="2" />
+        <text x="14" y="22" fontSize="12.5" fontWeight="800" fill="#3B2416">Main gate</text>
+        <text x="14" y="39" fontSize="11" fontWeight="700" fill="#B4501A">6 Homestead Rd</text>
+      </g>
+
+      <g transform="translate(36 384)">
+        <circle r="17" fill="#FFFBF4" opacity=".95" />
+        <path d="M0 -11 L4 0 L0 -2 L-4 0Z" fill="#D63A24" />
+        <text y="11" fontSize="10" fontWeight="800" fill="#B4501A" textAnchor="middle">N</text>
       </g>
     </svg>
   );
