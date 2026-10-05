@@ -404,14 +404,157 @@ kbd{font-family:inherit;font-size:.8rem;font-weight:700;padding:1px 7px;border-r
 }
 `;
 
-export default function RootLayout({ children }) {
+/* =====================================================================
+   "Around the South Coast" live data
+   Fetched on the server from visitkznsouthcoast.co.za and refreshed every
+   12 hours (Next.js incremental static regeneration). The page falls back
+   to its built-in list if the site can't be reached.
+   ===================================================================== */
+export const revalidate = 43200; // seconds (12 hours)
+
+const SC_BASE = "https://www.visitkznsouthcoast.co.za";
+const SC_UA = "OasisLodgeWebsite/1.0 (South Coast guide for guests of Oasis Lodge, Margate)";
+// Towns near Margate, closest first. Listings elsewhere on the coast are skipped.
+const NEAR = [
+  "margate", "ramsgate", "uvongo", "manaba-beach", "st-michaels", "shelly-beach", "izotsha", "gamalakhe",
+  "southbroom", "marina-beach", "san-lameer", "trafalgar", "munster", "port-shepstone", "port-shepstone-1",
+  "oribi-gorge", "umtentweni", "port-edward",
+];
+const TOWN_NAMES = { "st-michaels": "St Michael’s-on-Sea", "port-shepstone-1": "Port Shepstone", "scottburgh-umzinto-north": "Scottburgh" };
+const MONTHS = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+const DATE_RE = new RegExp(`(\\d{1,2})(?:st|nd|rd|th)?\\s+(${MONTHS.join("|")})\\s+(\\d{4})`);
+
+const decode = (s) =>
+  s
+    .replace(/&#(\d+);/g, (_, n) => String.fromCharCode(+n))
+    .replace(/&#x([0-9a-f]+);/gi, (_, n) => String.fromCharCode(parseInt(n, 16)))
+    .replace(/&nbsp;/g, " ")
+    .replace(/&quot;/g, '"')
+    .replace(/&#039;|&apos;/g, "'")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&amp;/g, "&");
+const textOf = (html) =>
+  decode(html.replace(/<br\s*\/?>/gi, " ").replace(/<[^>]+>/g, " ")).replace(/\s+/g, " ").trim();
+const tidyCaps = (s) =>
+  s && s.replace(/[^A-Za-z]/g, "").length > 6 && s === s.toUpperCase()
+    ? s.toLowerCase().replace(/(^|[.!?]\s+)([a-z])/g, (m) => m.toUpperCase())
+    : s;
+const titleCase = (s) =>
+  s === s.toUpperCase() ? s.toLowerCase().replace(/\b[a-z]/g, (c) => c.toUpperCase()) : s;
+const clip = (s, n = 190) => (s.length > n ? s.slice(0, s.lastIndexOf(" ", n)).replace(/[,;:\s]+$/, "") + "…" : s);
+
+const slugOf = (url) => {
+  const m = url.match(/\/(?:vic|events)\/([^/?#]+)\/[^/?#]+\/?$/);
+  return m && m[1] !== "category" && m[1] !== "page" ? m[1] : "";
+};
+const townOf = (slug) =>
+  TOWN_NAMES[slug] || slug.split("-").filter(Boolean).map((w) => w[0].toUpperCase() + w.slice(1)).join(" ");
+
+function parseListings(html, kind) {
+  const body = html.replace(/<(script|style|noscript|svg)[\s\S]*?<\/\1>/gi, " ");
+  const re = /<a\s[^>]*title="View:\s*([^"]*)"[^>]*>/gi;
+  const hits = [];
+  let m;
+  while ((m = re.exec(body))) {
+    const href = (m[0].match(/href="([^"]+)"/) || [])[1];
+    if (href) hits.push({ title: decode(m[1]).trim(), url: decode(href), at: m.index });
+  }
+  const seen = new Set();
+  const out = [];
+  hits.forEach((h, i) => {
+    if (seen.has(h.url)) return;
+    seen.add(h.url);
+    const end = i + 1 < hits.length ? hits[i + 1].at : Math.min(body.length, h.at + 6000);
+    let t = textOf(body.slice(h.at, end)).split(/Read more|Posts navigation|Loading\.\.\.|No Records Found/)[0];
+    t = t.replace(h.title, "").trim();
+    const dm = t.match(DATE_RE);
+    const addr = (t.match(/Address:\s*(.+?)\s+KwaZulu-Natal/) || [])[1];
+    let d = t;
+    if (kind === "events" && dm) d = d.slice(d.indexOf(dm[0]) + dm[0].length);
+    else if (d.includes("South Africa")) d = d.slice(d.lastIndexOf("South Africa") + 12);
+    d = d.replace(/https?:\/\/\S+/g, " ").replace(/No Reviews|Favorite/g, " ").replace(/\s+/g, " ").trim();
+    if (!d && addr) d = addr.replace(/\s+\d{4}$/, "").trim();
+    const slug = slugOf(h.url);
+    const item = { title: titleCase(h.title), town: slug ? townOf(slug) : "", slug, text: clip(tidyCaps(d)), url: h.url };
+    if (dm) {
+      const mi = MONTHS.indexOf(dm[2]);
+      item.date = `${dm[3]}-${String(mi + 1).padStart(2, "0")}-${dm[1].padStart(2, "0")}`;
+      item.when = `${+dm[1]} ${dm[2]} ${dm[3]}`;
+    }
+    out.push(item);
+  });
+  return out;
+}
+
+async function grab(path) {
+  try {
+    const res = await fetch(SC_BASE + path, {
+      headers: { "User-Agent": SC_UA, Accept: "text/html" },
+      next: { revalidate },
+      signal: AbortSignal.timeout(10000),
+    });
+    return res.ok ? await res.text() : "";
+  } catch {
+    return "";
+  }
+}
+
+const pages = (base, n) => Array.from({ length: n }, (_, i) => (i === 0 ? base : `${base}page/${i + 1}/`));
+
+function nearby(list, limit = 6) {
+  const seen = new Set();
+  return list
+    .filter((x) => NEAR.includes(x.slug) && !seen.has(x.url) && seen.add(x.url))
+    .sort((a, b) => NEAR.indexOf(a.slug) - NEAR.indexOf(b.slug) || a.title.localeCompare(b.title))
+    .slice(0, limit)
+    .map(({ slug, ...rest }) => rest);
+}
+
+async function getSouthCoast() {
+  const [ev1, ev2, food, todo] = await Promise.all([
+    grab("/events/category/events/?etype=upcoming"),
+    grab("/events/category/events/page/2/?etype=upcoming"),
+    Promise.all(pages("/vic/category/restaurants/", 4).map(grab)),
+    Promise.all(pages("/vic/category/things-to-do/", 10).map(grab)),
+  ]);
+
+  const yesterday = new Date(Date.now() - 864e5).toISOString().slice(0, 10);
+  const titles = new Set();
+  const events = [...parseListings(ev1, "events"), ...parseListings(ev2, "events")]
+    .filter((e) => !e.date || e.date >= yesterday)
+    .sort((a, b) => (a.date || "9999").localeCompare(b.date || "9999"))
+    .filter((e) => !titles.has(e.title) && titles.add(e.title))
+    .slice(0, 6)
+    .map(({ slug, ...rest }) => rest);
+
+  const data = {
+    fetchedAt: new Date().toISOString(),
+    events,
+    food: nearby(food.flatMap((h) => parseListings(h, "vic"))),
+    todo: nearby(todo.flatMap((h) => parseListings(h, "vic"))),
+  };
+  return data.events.length || data.food.length || data.todo.length ? data : null;
+}
+
+export default async function RootLayout({ children }) {
+  const southCoast = await getSouthCoast().catch(() => null);
   return (
     <html lang="en-ZA" className={jakarta.variable} suppressHydrationWarning>
       <head>
         <script dangerouslySetInnerHTML={{ __html: "document.documentElement.classList.add('js')" }} />
         <style dangerouslySetInnerHTML={{ __html: css }} />
       </head>
-      <body>{children}</body>
+      <body>
+        {southCoast && (
+          <script
+            id="south-coast-data"
+            type="application/json"
+            dangerouslySetInnerHTML={{ __html: JSON.stringify(southCoast).replace(/</g, "\u003c") }}
+          />
+        )}
+        {children}
+      </body>
     </html>
   );
 }
