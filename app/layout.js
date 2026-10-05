@@ -286,6 +286,77 @@ kbd{font-family:inherit;font-size:.8rem;font-weight:700;padding:1px 7px;border-r
 .footer a:hover{color:#fff}
 .footer-bottom{margin-top:40px;padding-top:22px;border-top:1px solid rgba(255,236,210,.1);display:flex;flex-wrap:wrap;justify-content:space-between;gap:10px;font-size:.84rem;color:rgba(255,236,210,.5)}
 
+/* rooms: hotel layouts */
+.sub-head{display:flex;align-items:baseline;justify-content:space-between;flex-wrap:wrap;gap:8px 20px;margin-bottom:20px;padding-bottom:12px;border-bottom:2px dashed rgba(169,105,63,.3)}
+.sub-head h3{font-size:clamp(1.4rem,2.4vw,1.8rem);letter-spacing:-.025em;color:var(--earth)}
+.sub-head span{font-weight:600;color:var(--muted);font-size:.95rem}
+.hotel-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:18px}
+.rtype{display:flex;flex-direction:column;padding:24px;border-radius:24px;background:var(--card);border:1px solid var(--line);transition:transform .3s,box-shadow .3s}
+.rtype:hover{transform:translateY(-4px);box-shadow:var(--shadow)}
+.bed-row{display:flex;gap:6px;color:var(--sunset-d)}
+.bed-row.sm{gap:3px;color:var(--stone-d)}
+.rtype .bed-row{margin-bottom:16px;padding:10px 12px;border-radius:var(--pebble);background:#F7E6CF;align-self:flex-start}
+.rtype h4{font-size:1.12rem;letter-spacing:-.015em;color:var(--earth);line-height:1.3}
+.rtype p{color:var(--muted);font-size:.93rem;margin-top:6px}
+.keys{list-style:none;display:flex;flex-wrap:wrap;gap:8px;margin:18px 0 20px}
+.key{position:relative;display:grid;place-items:center;min-width:54px;padding:14px 10px 8px;border-radius:14px 14px 20px 20px;background:linear-gradient(160deg,var(--stone-l),var(--stone-d));color:#FFF6E6;font-weight:800;font-size:1.25rem;line-height:1;box-shadow:inset 0 2px 0 rgba(255,240,220,.45),inset 0 -4px 8px rgba(59,36,22,.3)}
+.key::before{content:"";position:absolute;top:5px;left:50%;width:7px;height:7px;margin-left:-3.5px;border-radius:50%;background:var(--card);box-shadow:inset 0 1px 2px rgba(59,36,22,.5)}
+.key small{font-size:.6rem;font-weight:700;letter-spacing:.02em;opacity:.85;margin:4px 0 3px}
+
+/* rooms: apartments */
+.units{display:grid;grid-template-columns:repeat(3,1fr);gap:22px;align-items:start}
+.unit{border-radius:26px;overflow:hidden;background:var(--card);border:1px solid var(--line);transition:transform .3s,box-shadow .3s}
+.unit:hover{transform:translateY(-4px);box-shadow:var(--shadow)}
+.unit-top{position:relative;display:flex;align-items:flex-end;gap:12px;flex-wrap:wrap;padding:22px 24px 20px;color:#fff;background:linear-gradient(135deg,var(--sunset),var(--ember))}
+.u11 .unit-top{background:linear-gradient(135deg,#B8874C,#E6C58E 45%,#9C6B34)}
+.u12 .unit-top{background:linear-gradient(135deg,var(--palm-l),#173D28)}
+.unit-no{display:flex;flex-direction:column;font-size:3.2rem;font-weight:800;line-height:.9;letter-spacing:-.04em}
+.unit-no small{font-size:.8rem;font-weight:700;letter-spacing:0;opacity:.85;margin-bottom:4px}
+.unit-tag{padding:5px 12px;border-radius:999px;background:rgba(255,248,232,.92);color:var(--earth);font-size:.78rem;font-weight:800;align-self:flex-start}
+.unit-meta{margin-left:auto;font-weight:700;font-size:.9rem;opacity:.95}
+.unit-body{padding:22px 24px 26px}
+.unit-body > p{color:var(--muted)}
+.bedrooms{list-style:none;margin:18px 0 6px;display:grid;gap:10px}
+.bedrooms li{display:grid;grid-template-columns:88px 1fr;gap:12px;padding:12px 14px;border-radius:16px;background:#F8ECDB}
+.br-name{font-weight:800;font-size:.88rem;color:var(--earth)}
+.br-beds{display:flex;flex-direction:column;gap:4px;font-size:.9rem;font-weight:600;color:var(--ink)}
+.br-beds em{font-style:normal;font-size:.8rem;font-weight:600;color:var(--sunset-d)}
+.group-cta{margin-top:26px;display:grid;grid-template-columns:auto 1fr auto;gap:22px;align-items:center;padding:26px 30px;border-radius:28px;background:var(--card);border:1px solid var(--line)}
+.group-cta h3{font-size:1.25rem;letter-spacing:-.02em;color:var(--earth)}
+.group-cta p{color:var(--muted);margin-top:4px;max-width:44rem}
+
+/* events: catering */
+.catering{display:grid;grid-template-columns:auto 1fr;gap:20px;padding:26px 28px;border-radius:24px;background:linear-gradient(135deg,#FCE7C6,#F7D3A4);border:1px solid rgba(226,105,31,.3)}
+.catering h3{font-size:1.18rem;color:var(--earth)}
+.catering p{color:#6A4A37;margin-top:4px}
+.meals{list-style:none;display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+.meals li{padding:6px 14px;border-radius:999px;background:rgba(255,251,244,.85);font-weight:700;font-size:.82rem;color:var(--sunset-d)}
+
+/* explore */
+.explore{background:var(--grain),linear-gradient(180deg,var(--cream),#FBEAD2)}
+.tabs{display:inline-flex;flex-wrap:wrap;gap:6px;padding:6px;border-radius:999px;background:#F3DFC2;margin-bottom:26px}
+.tabs button{display:inline-flex;align-items:center;gap:8px;padding:11px 18px;border-radius:999px;font-weight:700;font-size:.93rem;color:var(--muted);transition:background .25s,color .25s}
+.tabs button:hover{color:var(--earth)}
+.tabs button.on{background:var(--card);color:var(--sunset-d);box-shadow:0 6px 14px -8px rgba(59,36,22,.5)}
+.ex-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+.ex-card{display:flex;flex-direction:column;padding:24px;border-radius:24px;background:var(--card);border:1px solid var(--line);transition:transform .3s,box-shadow .3s,border-color .3s;animation:rise .5s cubic-bezier(.2,.7,.2,1) both}
+.ex-card:hover{transform:translateY(-4px);box-shadow:var(--shadow);border-color:rgba(226,105,31,.4)}
+.ex-meta{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px}
+.ex-town{display:inline-flex;align-items:center;gap:5px;padding:5px 10px;border-radius:999px;background:#F4E1C6;color:var(--stone-d);font-size:.78rem;font-weight:700}
+.ex-when{padding:5px 10px;border-radius:999px;background:linear-gradient(135deg,var(--sunset),var(--ember));color:#fff;font-size:.78rem;font-weight:700}
+.ex-card h3{font-size:1.12rem;letter-spacing:-.015em;color:var(--earth);line-height:1.3}
+.ex-card p{color:var(--muted);font-size:.94rem;margin-top:6px;flex:1}
+.ex-more{margin-top:14px;display:inline-flex;align-items:center;gap:6px;font-weight:700;color:var(--sunset-d);font-size:.92rem}
+.ex-empty{grid-column:1/-1}
+.ex-foot{margin-top:26px;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:14px}
+.ex-foot p{color:var(--muted);font-size:.88rem;max-width:44rem}
+
+/* google photos panel */
+.gallery-cta{margin-top:22px}
+.gallery-inner{display:grid;grid-template-columns:auto 1fr auto;gap:22px;align-items:center;padding:26px 30px;border-radius:24px 20px 26px 18px;background:linear-gradient(120deg,rgba(30,18,10,.94),rgba(59,36,22,.88));color:#FFF3DE}
+.gallery-inner h3{font-size:1.3rem;letter-spacing:-.02em}
+.gallery-inner p{color:rgba(255,236,210,.8);margin-top:4px;max-width:40rem}
+
 /* logos */
 .badge{display:block;border-radius:50%;flex:none;-webkit-user-select:none;user-select:none}
 .brand .badge{filter:drop-shadow(0 4px 8px rgba(59,36,22,.3))}
@@ -299,6 +370,10 @@ kbd{font-family:inherit;font-size:.8rem;font-weight:700;padding:1px 7px;border-r
   .nav-links.open{opacity:1;transform:none;pointer-events:auto}
   .nav-links a{padding:14px 16px;font-size:1rem}
   .hero-grid,.amen-grid,.events-grid,.contact-grid,.play-grid,.arrive{grid-template-columns:1fr}
+  .hotel-grid{grid-template-columns:1fr 1fr}
+  .units,.ex-grid{grid-template-columns:1fr 1fr}
+  .group-cta,.gallery-inner{grid-template-columns:auto 1fr}
+  .group-cta .btn,.gallery-inner .btn{grid-column:1/-1;justify-self:start}
   .postcard-wrap{max-width:460px;margin-inline:auto;width:100%}
   .float-chip{left:-8px}
   .rooms{grid-template-columns:1fr 1fr}
@@ -316,7 +391,10 @@ kbd{font-family:inherit;font-size:.8rem;font-weight:700;padding:1px 7px;border-r
   .stone-frame{padding:9px}
   .nav-cta .btn{padding:11px 16px;font-size:.9rem}
   .brand{font-size:1rem}
-  .photos{grid-template-columns:1fr 1fr;gap:12px}
+  .hotel-grid,.units,.ex-grid{grid-template-columns:1fr}
+  .group-cta,.gallery-inner{grid-template-columns:1fr;padding:24px}
+  .tabs{display:flex;border-radius:22px}
+  .tabs button{flex:1;justify-content:center;padding:10px 12px}
 }
 @media (max-width:360px){.brand{font-size:0}}
 @media (prefers-reduced-motion:reduce){
