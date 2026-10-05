@@ -896,10 +896,20 @@ const EXPLORE_TABS = [
 function Explore() {
   const [tab, setTab] = useState("events");
   const [today, setToday] = useState(null);
-  useEffect(() => setToday(new Date().toISOString().slice(0, 10)), []);
+  const [live, setLive] = useState(null);
+  useEffect(() => {
+    setToday(new Date(Date.now() - 864e5).toISOString().slice(0, 10));
+    // Fresh listings injected by the server (see layout.js); refreshed every 12 hours.
+    try {
+      const el = document.getElementById("south-coast-data");
+      if (el) setLive(JSON.parse(el.textContent));
+    } catch {}
+  }, []);
 
+  const source = live && live[tab] && live[tab].length ? live[tab] : SOUTH_COAST[tab];
   const items =
-    tab === "events" && today ? SOUTH_COAST.events.filter((e) => e.end >= today) : SOUTH_COAST[tab];
+    tab === "events" && today ? source.filter((e) => !(e.end || e.date) || (e.end || e.date) >= today) : source;
+  const checked = live && new Date(live.fetchedAt).toLocaleDateString("en-ZA", { day: "numeric", month: "long", year: "numeric" });
   const more =
     tab === "events"
       ? { href: `${VISIT}/events/category/events/?etype=upcoming`, label: "See all upcoming events" }
@@ -939,9 +949,9 @@ function Explore() {
             </div>
           )}
           {items.map((it) => (
-            <a className="ex-card" key={it.title} href={it.url} target="_blank" rel="noopener noreferrer">
+            <a className="ex-card" key={it.url} href={it.url} target="_blank" rel="noopener noreferrer">
               <div className="ex-meta">
-                <span className="ex-town"><Icon name="pin" size={14} /> {it.town}</span>
+                {it.town && <span className="ex-town"><Icon name="pin" size={14} /> {it.town}</span>}
                 {it.when && <span className="ex-when">{it.when}</span>}
               </div>
               <h3>{it.title}</h3>
@@ -952,7 +962,12 @@ function Explore() {
         </div>
 
         <div className="ex-foot reveal">
-          <p>Listings from Visit KZN South Coast, checked October 2026. Details can change, so confirm with the venue before you go.</p>
+          <p>
+            {checked
+              ? `Updated automatically from Visit KZN South Coast. Last checked ${checked}.`
+              : "Listings from Visit KZN South Coast."}{" "}
+            Details can change, so confirm with the venue before you go.
+          </p>
           <a className="btn btn-ghost" href={more.href} target="_blank" rel="noopener noreferrer">
             {more.label} <Icon name="right" size={18} />
           </a>
