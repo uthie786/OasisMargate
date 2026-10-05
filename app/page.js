@@ -668,8 +668,42 @@ function PostcardScene() {
   );
 }
 
+/* Simple area map traced from Google Maps (screenshot coordinates, scaled into the 600x420 view). */
+const MAP_ROADS = [
+  // [path, width]
+  ["M575 874 L640 640 L690 480 L740 320 L800 160 L835 40 L840 0", 26], // Marine Drive
+  ["M360 874 L380 700 L400 610 L470 545 L545 465 L640 390 L700 335 L735 300", 17], // Homestead Rd
+  ["M0 520 L120 430 L230 385 L330 360 L490 330 L600 360 L645 388", 17], // Erasmus Rd
+  ["M0 830 L120 730 L260 680 L400 615", 14], // Ridge Rd
+  ["M0 110 L120 60 L280 15 L420 25 L490 50 L560 25 L590 -10", 14], // Uplands Rd
+  ["M1040 -10 L1050 250 L1080 380 L1100 450 L1060 500 L960 560 L930 620 L960 720 L1010 780 L1020 884", 14], // Finnis Rd
+  ["M455 350 L500 420 L520 470", 10],
+  ["M300 370 L330 450 L370 560 L400 610", 10],
+  ["M490 50 L485 140 L510 190 L525 230 L510 330", 10],
+  ["M470 150 L560 225 L660 280 L705 320", 12],
+  ["M800 140 L1045 245", 10],
+  ["M760 420 L1060 500", 10],
+  ["M840 60 L940 100", 10],
+  ["M640 680 L800 720 L870 700", 10],
+  ["M700 790 L1000 874", 10],
+];
+const MAP_BLOCKS = [
+  [40, 140, 60, 40, -20], [150, 200, 40, 30, 0], [230, 130, 40, 40, -30], [300, 250, 50, 40, 0], [60, 300, 50, 35, -25],
+  [170, 270, 40, 30, 0], [260, 300, 40, 30, 10], [40, 560, 50, 40, -20], [150, 480, 45, 35, 0], [230, 440, 50, 40, 0],
+  [250, 500, 40, 30, 0], [60, 640, 40, 30, -30], [200, 560, 60, 40, 0], [280, 560, 40, 40, 10], [150, 640, 40, 30, 0],
+  [250, 620, 40, 30, 0], [190, 800, 50, 40, -20], [300, 760, 50, 40, 0], [420, 700, 40, 60, 0], [480, 760, 50, 40, 0],
+  [500, 620, 40, 50, 0], [440, 660, 30, 30, 0], [530, 370, 40, 30, 0], [460, 420, 35, 30, 0], [330, 180, 60, 40, 0],
+  [400, 100, 40, 30, 0], [340, 60, 40, 30, 0], [630, 30, 60, 40, 0], [700, 250, 50, 50, 0], [620, 290, 40, 30, 0],
+  [860, 120, 80, 60, 10], [930, 10, 60, 80, 10], [970, 130, 50, 70, 10], [880, 260, 50, 40, 10], [950, 300, 40, 40, 10],
+  [870, 350, 60, 40, 10], [940, 360, 50, 40, 10], [880, 470, 90, 28, 12], [760, 430, 70, 60, 10], [730, 540, 70, 40, 12],
+  [810, 520, 40, 40, 10], [680, 600, 60, 80, 10], [760, 620, 60, 40, 10], [830, 640, 50, 50, 10], [690, 720, 40, 30, 10],
+  [900, 790, 40, 30, 10], [740, 840, 50, 30, 10], [520, 540, 40, 30, 0], [600, 560, 30, 30, 0], [540, 600, 30, 40, 0],
+  [620, 520, 30, 30, 0],
+];
+const COAST = "M1200 -10 L1150 150 L1110 280 L1150 330 L1100 420 L1080 520 L1050 600 L1010 680 L1000 760 L980 884";
+
 function MapScene() {
-  // Zoom in on the property on small screens so the labels stay readable.
+  // Zoom in a little on small screens so the labels stay readable.
   const [narrow, setNarrow] = useState(false);
   useEffect(() => {
     const mq = window.matchMedia("(max-width: 640px)");
@@ -678,120 +712,91 @@ function MapScene() {
     mq.addEventListener("change", on);
     return () => mq.removeEventListener("change", on);
   }, []);
-  const homestead = "M-80 332 L400 -71";
-  const marine = "M355 480 L545 -70";
-  const premises = "M272 53 L392 76 L412 21 L490 45 L378 367 L96 263 L121 176 Z";
+
   return (
     <svg
-      viewBox={narrow ? "0 10 520 390" : "0 0 600 420"}
+      viewBox={narrow ? "116 46 400 300" : "0 0 600 420"}
       preserveAspectRatio="xMidYMid meet"
       style={{ overflow: "visible" }}
       role="img"
-      aria-label="Map of the Oasis Lodge premises showing the buildings, driveway, parking, pool and rooftop car wash. Cars enter through the main gate at 6 Homestead Road. The front of the building faces Marine Drive at number 99, where a guest gate at the southern corner is for entering and leaving on foot only, with a key. The rooftop car wash is on the north side of the property."
+      aria-label="Map of central Margate showing Oasis Lodge between Homestead Road and Marine Drive, near Shoprite Margate and Margate Pier. Cars enter through the main gate at 6 Homestead Road. Guests can enter and leave on foot through the guest gate on Marine Drive with a key."
     >
-      <defs>
-        <pattern id="mapGrid" width="28" height="28" patternUnits="userSpaceOnUse">
-          <path d="M28 0H0V28" fill="none" stroke="#E6CDA8" strokeWidth="1" />
-        </pattern>
-        <pattern id="washLanes" width="18" height="18" patternUnits="userSpaceOnUse" patternTransform="rotate(12)">
-          <rect width="18" height="18" fill="#E9D3B2" />
-          <path d="M0 9h10" stroke="#FFFBF4" strokeWidth="2" strokeDasharray="6 4" />
-        </pattern>
-        <pattern id="parkBays" width="8" height="8" patternUnits="userSpaceOnUse" patternTransform="rotate(25)">
-          <rect width="8" height="8" fill="#E3CBA6" />
-          <path d="M0 0v8" stroke="#FFFBF4" strokeWidth="1.6" />
-        </pattern>
-        <path id="hsLabel" d="M168 124 L330 -12" />
-        <path id="mdLabel" d="M456 190 L503 60" />
-      </defs>
+      <rect x="-400" y="-300" width="1400" height="1020" fill="#F6EEDF" />
 
-      {/* land and neighbouring blocks */}
-      <rect x="-400" y="-300" width="1400" height="1020" fill="#F3E1C4" />
-      <rect x="-400" y="-300" width="1400" height="1020" fill="url(#mapGrid)" opacity=".7" />
-      <g fill="#EAD5B5">
-        <rect x="18" y="28" width="96" height="60" rx="12" />
-        <rect x="150" y="-30" width="90" height="70" rx="12" />
-        <rect x="-10" y="150" width="70" height="56" rx="12" />
-        <rect x="-20" y="300" width="90" height="80" rx="12" />
-        <rect x="120" y="330" width="140" height="80" rx="12" transform="rotate(20 190 370)" />
-        <rect x="300" y="-40" width="90" height="56" rx="12" />
-        <rect x="455" y="130" width="120" height="80" rx="12" />
-        <rect x="430" y="330" width="150" height="76" rx="12" />
-        <rect x="520" y="10" width="90" height="90" rx="12" />
-      </g>
-      <g fill="#D3E0B5">
-        <circle cx="70" cy="110" r="18" />
-        <circle cx="210" cy="10" r="14" />
-        <circle cx="30" cy="250" r="16" />
-      </g>
+      <g transform="translate(-72 0) scale(0.48)">
+        {/* sea and beach */}
+        <path d={`${COAST} L1500 884 L1500 -10Z`} fill="#8FD0DE" />
+        <path d={`${COAST} L1500 884 L1500 -10Z`} fill="none" stroke="#FFF6E6" strokeWidth="6" />
+        <path d="M1150 -10 L1100 150 L1060 280 L1095 330 L1045 420 L1025 520 L995 600 L960 680 L950 760 L935 884 L980 884 L1000 760 L1010 680 L1050 600 L1080 520 L1100 420 L1150 330 L1110 280 L1150 150 L1200 -10Z" fill="#F1DDB8" />
 
-      {/* roads */}
-      <path d={homestead} stroke="#DDB283" strokeWidth="30" fill="none" />
-      <path d={homestead} stroke="#FFFBF4" strokeWidth="24" fill="none" />
-      <path d={marine} stroke="#DDB283" strokeWidth="38" fill="none" />
-      <path d={marine} stroke="#FFFBF4" strokeWidth="32" fill="none" />
-      <path d={marine} stroke="#E6CDA8" strokeWidth="1.5" strokeDasharray="10 10" fill="none" />
-      <text fontSize="11" fontWeight="700" fill="#7B5B48" dy="4">
-        <textPath href="#hsLabel" startOffset="6%">Homestead Rd</textPath>
-      </text>
-      <text fontSize="11" fontWeight="700" fill="#7B5B48" dy="4">
-        <textPath href="#mdLabel" startOffset="10%">Marine Drive</textPath>
-      </text>
+        {/* buildings */}
+        <g fill="#EADCC6" stroke="#DCC7A6" strokeWidth="2">
+          {MAP_BLOCKS.map(([x, y, w, h, r], i) => (
+            <rect key={i} x={x} y={y} width={w} height={h} rx="3" transform={`rotate(${r} ${x + w / 2} ${y + h / 2})`} />
+          ))}
+        </g>
+        {/* Shoprite Margate */}
+        <path d="M562 110 L780 106 L760 240 L560 186Z" fill="#E6D3B5" stroke="#D2B990" strokeWidth="2.5" />
 
-      {/* premises */}
-      <path d={premises} fill="#FFF6E6" stroke="#E2691F" strokeWidth="2.5" strokeDasharray="7 5" strokeLinejoin="round" />
+        {/* roads */}
+        <g fill="none" strokeLinecap="round" strokeLinejoin="round">
+          {MAP_ROADS.map(([d, w], i) => (
+            <path key={`e${i}`} d={d} stroke="#DCC9AA" strokeWidth={w + 4} />
+          ))}
+          {MAP_ROADS.map(([d, w], i) => (
+            <path key={`r${i}`} d={d} stroke="#FFFFFF" strokeWidth={w} />
+          ))}
+        </g>
 
-      {/* driveway and parking (unlabelled) */}
-      <path d="M142 164 C150 202 166 262 200 290 C240 322 300 322 330 292 C352 268 356 222 356 184" stroke="#D9BE96" strokeWidth="26" fill="none" strokeLinecap="round" />
-      <path d="M142 164 C150 202 166 262 200 290 C240 322 300 322 330 292 C352 268 356 222 356 184" stroke="#EAD7B8" strokeWidth="21" fill="none" strokeLinecap="round" />
-      <g fill="url(#parkBays)" stroke="#C9A77F" strokeWidth="1.5" strokeLinejoin="round">
-        <path d="M156 156 L190 154 L224 226 L207 241Z" />
-        <path d="M120 196 L142 194 L144 228 L121 230Z" />
-        <path d="M319 178 L350 188 L320 280 L293 275Z" />
+        {/* Margate Pier */}
+        <path d="M1100 445 L1205 445" stroke="#FFFFFF" strokeWidth="9" strokeLinecap="round" />
+        <path d="M1100 445 L1205 445" stroke="#C9B08A" strokeWidth="2" strokeDasharray="4 8" />
+
+        {/* Oasis Lodge property */}
+        <path d="M548 463 L638 389 L712 408 L680 517Z" fill="rgba(226,105,31,.16)" stroke="#E2691F" strokeWidth="4" strokeDasharray="10 7" strokeLinejoin="round" />
       </g>
 
-      {/* car wash (rooftop) */}
-      <path d="M201 118 L272 59 L400 78 L439 101 L434 168 L412 185 L328 162 L244 134Z" fill="url(#washLanes)" stroke="#C69A5D" strokeWidth="2" strokeLinejoin="round" />
-      <g transform="translate(300 98) rotate(10)">
-        <rect x="-15" y="-8" width="30" height="16" rx="6" fill="#2A86A6" />
-        <rect x="-7" y="-6" width="12" height="12" rx="3" fill="#A8DCEB" />
+      {/* road and landmark labels */}
+      <g fontWeight="700" fill="#8A7464">
+        <text x="226" y="340" fontSize="9" transform="rotate(-73 226 340)">Marine Dr</text>
+        <text x="116" y="330" fontSize="9" transform="rotate(-80 116 330)">Homestead Rd</text>
+        <text x="70" y="186" fontSize="9" transform="rotate(-18 70 186)">Erasmus Rd</text>
+        <text x="433" y="150" fontSize="9" transform="rotate(84 433 150)">Finnis Rd</text>
       </g>
-      <circle cx="338" cy="112" r="3" fill="#A8DCEB" />
-      <circle cx="346" cy="104" r="2" fill="#A8DCEB" />
-      <circle cx="350" cy="116" r="2.5" fill="#A8DCEB" />
-      <text x="322" y="146" fontSize="11.5" fontWeight="800" fill="#3B2416" textAnchor="middle" transform="rotate(12 322 146)">Rooftop Car Wash</text>
-
-      {/* pool */}
-      <rect x="244" y="168" width="40" height="22" rx="6" fill="#4FC1B8" stroke="#FFFBF4" strokeWidth="3" transform="rotate(-18 264 179)" />
-      <path d="M252 180c4-3 8-3 12 0s8 3 12 0" stroke="#FFFBF4" strokeWidth="1.5" fill="none" transform="rotate(-18 264 179)" />
-      <text x="292" y="166" fontSize="11" fontWeight="800" fill="#1D5F7A" transform="rotate(-18 292 166)">Pool</text>
-
-      {/* buildings (unlabelled) */}
-      <g fill="#B8653E" stroke="#8A4A2C" strokeWidth="2" strokeLinejoin="round">
-        <path d="M182 134 L224 142 L220 162 L178 154Z" />
-        <path d="M107 228 L179 244 L173 275 L104 257Z" />
-        <path d="M232 194 L304 200 L300 248 L228 242Z" />
-        <path d="M386 178 L438 200 L398 348 L343 338Z" />
+      <g>
+        <circle cx="236" cy="78" r="7" fill="#E2691F" />
+        <path d="M233 76h6l-1 4h-4Z" fill="#FFF6E6" />
+        <text x="247" y="82" fontSize="10.5" fontWeight="800" fill="#3B2416">Shoprite Margate</text>
       </g>
-      <g stroke="#8A4A2C" strokeWidth="1.2" opacity=".55" fill="none">
-        <path d="M180 144 L222 152M106 242 L176 259M230 218 L302 224M412 189 L370 343" />
+      <g>
+        <circle cx="490" cy="200" r="7" fill="#1D5F7A" />
+        <path d="M487 201h6M490 197v7" stroke="#FFF6E6" strokeWidth="1.6" strokeLinecap="round" />
+        <text x="480" y="204" fontSize="10.5" fontWeight="800" fill="#0F4357" textAnchor="end">Margate Pier</text>
       </g>
 
-      {/* pedestrian guest gate on Marine Drive (key required) */}
-      <circle className="pulse" cx="383" cy="357" r="11" fill="#2A86A6" opacity=".45" />
-      <g transform="translate(383 357) rotate(-71)">
-        <rect x="-11" y="-4" width="22" height="8" rx="2.5" fill="#A8DCEB" stroke="#1D5F7A" strokeWidth="1.5" />
-        <path d="M-5 -4v8M0 -4v8M5 -4v8" stroke="#1D5F7A" strokeWidth="1.1" />
+      {/* main vehicle gate */}
+      <circle className="pulse" cx="204" cy="209" r="10" fill="#E2691F" opacity=".55" />
+      <circle cx="204" cy="209" r="6" fill="#F2C94C" stroke="#3B2416" strokeWidth="2" />
+      <path d="M198 204 L176 160" stroke="#3B2416" strokeWidth="1.4" strokeDasharray="3 3" />
+      <g transform={narrow ? "translate(122 118)" : "translate(40 104)"}>
+        <rect width="150" height="56" rx="16" fill="#FFFBF4" stroke="#E2691F" strokeWidth="2" />
+        <text x="14" y="21" fontSize="12.5" fontWeight="800" fill="#3B2416">Main gate</text>
+        <text x="14" y="36" fontSize="11" fontWeight="700" fill="#B4501A">6 Homestead Rd</text>
+        <text x="14" y="49" fontSize="9.5" fontWeight="600" fill="#7B5B48">Vehicle entrance</text>
       </g>
-      {!narrow && <path d="M392 352 L440 324" stroke="#1D5F7A" strokeWidth="1.5" strokeDasharray="3 3" />}
-      <g transform={narrow ? "translate(206 340)" : "translate(430 280)"}>
-        <rect width="166" height="56" rx="16" fill="#FFFBF4" stroke="#2A86A6" strokeWidth="2" />
+
+      {/* guest gate on Marine Drive */}
+      <circle className="pulse" cx="256" cy="242" r="10" fill="#2A86A6" opacity=".5" />
+      <circle cx="256" cy="242" r="6" fill="#7FD3A0" stroke="#1D5F7A" strokeWidth="2" />
+      <path d="M262 247 L300 284" stroke="#1D5F7A" strokeWidth="1.4" strokeDasharray="3 3" />
+      <g transform="translate(296 278)">
+        <rect width="168" height="56" rx="16" fill="#FFFBF4" stroke="#2A86A6" strokeWidth="2" />
         <g transform="translate(20 28)" fill="none" stroke="#1D5F7A" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
           <circle cx="1" cy="-10" r="2.4" fill="#1D5F7A" stroke="none" />
           <path d="M0 -6 L-1 2 L-5 10M-1 2 L4 6 L5 11M-5 -2 L0 -5 L5 -1" />
         </g>
-        <text x="36" y="20" fontSize="11.5" fontWeight="800" fill="#3B2416">99 Marine Drive</text>
-        <text x="36" y="34" fontSize="10" fontWeight="700" fill="#1D5F7A">Guest gate, on foot only</text>
+        <text x="36" y="20" fontSize="11.5" fontWeight="800" fill="#3B2416">Guest gate</text>
+        <text x="36" y="34" fontSize="10" fontWeight="700" fill="#1D5F7A">99 Marine Dr, on foot only</text>
         <g transform="translate(36 41)">
           <circle cx="4" cy="4" r="3" fill="none" stroke="#B4501A" strokeWidth="1.5" />
           <path d="M7 4h7M12 4v3" stroke="#B4501A" strokeWidth="1.5" strokeLinecap="round" />
@@ -799,23 +804,10 @@ function MapScene() {
         </g>
       </g>
 
-      {/* main gate */}
-      <circle className="pulse" cx="140" cy="160" r="14" fill="#E2691F" opacity=".55" />
-      <g transform="translate(140 160) rotate(-40)">
-        <rect x="-15" y="-5" width="30" height="10" rx="3" fill="#F2C94C" stroke="#3B2416" strokeWidth="1.5" />
-        <path d="M-9 -5v10M-3 -5v10M3 -5v10M9 -5v10" stroke="#3B2416" strokeWidth="1.2" />
-      </g>
-      <path d="M128 140 L104 124" stroke="#3B2416" strokeWidth="1.5" strokeDasharray="3 3" />
-      <g transform="translate(14 72)">
-        <rect width="132" height="52" rx="16" fill="#FFFBF4" stroke="#E2691F" strokeWidth="2" />
-        <text x="14" y="22" fontSize="12.5" fontWeight="800" fill="#3B2416">Main gate</text>
-        <text x="14" y="39" fontSize="11" fontWeight="700" fill="#B4501A">6 Homestead Rd</text>
-      </g>
-
-      <g transform="translate(36 384)">
-        <circle r="17" fill="#FFFBF4" opacity=".95" />
-        <path d="M0 -11 L4 0 L0 -2 L-4 0Z" fill="#D63A24" />
-        <text y="11" fontSize="10" fontWeight="800" fill="#B4501A" textAnchor="middle">N</text>
+      <g transform={narrow ? "translate(138 326)" : "translate(30 392)"}>
+        <circle r="15" fill="#FFFBF4" opacity=".95" />
+        <path d="M0 -10 L4 0 L0 -2 L-4 0Z" fill="#D63A24" />
+        <text y="10" fontSize="9" fontWeight="800" fill="#B4501A" textAnchor="middle">N</text>
       </g>
     </svg>
   );
