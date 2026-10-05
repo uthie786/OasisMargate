@@ -687,7 +687,7 @@ function MapScene() {
       preserveAspectRatio="xMidYMid meet"
       style={{ overflow: "visible" }}
       role="img"
-      aria-label="Map of the Oasis Lodge premises. Cars enter through the main gate at 6 Homestead Road. The front of the building faces Marine Drive at number 99, where a guest gate at the southern corner is for entering and leaving on foot only, with a key. The rooftop car wash is on the north side of the property."
+      aria-label="Map of the Oasis Lodge premises showing the buildings, driveway, parking, pool and rooftop car wash. Cars enter through the main gate at 6 Homestead Road. The front of the building faces Marine Drive at number 99, where a guest gate at the southern corner is for entering and leaving on foot only, with a key. The rooftop car wash is on the north side of the property."
     >
       <defs>
         <pattern id="mapGrid" width="28" height="28" patternUnits="userSpaceOnUse">
@@ -697,9 +697,10 @@ function MapScene() {
           <rect width="18" height="18" fill="#E9D3B2" />
           <path d="M0 9h10" stroke="#FFFBF4" strokeWidth="2" strokeDasharray="6 4" />
         </pattern>
-        <marker id="routeArrow" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
-          <path d="M0 0L10 5L0 10Z" fill="#E2691F" />
-        </marker>
+        <pattern id="parkBays" width="8" height="8" patternUnits="userSpaceOnUse" patternTransform="rotate(25)">
+          <rect width="8" height="8" fill="#E3CBA6" />
+          <path d="M0 0v8" stroke="#FFFBF4" strokeWidth="1.6" />
+        </pattern>
         <path id="hsLabel" d="M168 124 L330 -12" />
         <path id="mdLabel" d="M456 190 L503 60" />
       </defs>
@@ -740,13 +741,14 @@ function MapScene() {
       {/* premises */}
       <path d={premises} fill="#FFF6E6" stroke="#E2691F" strokeWidth="2.5" strokeDasharray="7 5" strokeLinejoin="round" />
 
-      {/* garden and parking */}
-      <path d="M104 258 L118 196 C140 214 150 240 146 272Z" fill="#CFE0B5" />
-      <path d="M142 162 C162 188 176 212 196 252" stroke="#E8D3B4" strokeWidth="22" fill="none" strokeLinecap="round" />
-      <g fill="none" stroke="#C9A77F" strokeWidth="1.5">
-        <path d="M168 228l22-8M174 242l22-8M180 256l22-8" />
+      {/* driveway and parking (unlabelled) */}
+      <path d="M142 164 C150 202 166 262 200 290 C240 322 300 322 330 292 C352 268 356 222 356 184" stroke="#D9BE96" strokeWidth="26" fill="none" strokeLinecap="round" />
+      <path d="M142 164 C150 202 166 262 200 290 C240 322 300 322 330 292 C352 268 356 222 356 184" stroke="#EAD7B8" strokeWidth="21" fill="none" strokeLinecap="round" />
+      <g fill="url(#parkBays)" stroke="#C9A77F" strokeWidth="1.5" strokeLinejoin="round">
+        <path d="M156 156 L190 154 L224 226 L207 241Z" />
+        <path d="M120 196 L142 194 L144 228 L121 230Z" />
+        <path d="M319 178 L350 188 L320 280 L293 275Z" />
       </g>
-      <text x="148" y="280" fontSize="10" fontWeight="700" fill="#7B5B48" transform="rotate(-20 148 280)">Parking</text>
 
       {/* car wash (rooftop) */}
       <path d="M201 118 L272 59 L400 78 L439 101 L434 168 L412 185 L328 162 L244 134Z" fill="url(#washLanes)" stroke="#C69A5D" strokeWidth="2" strokeLinejoin="round" />
@@ -762,14 +764,18 @@ function MapScene() {
       {/* pool */}
       <rect x="244" y="168" width="40" height="22" rx="6" fill="#4FC1B8" stroke="#FFFBF4" strokeWidth="3" transform="rotate(-18 264 179)" />
       <path d="M252 180c4-3 8-3 12 0s8 3 12 0" stroke="#FFFBF4" strokeWidth="1.5" fill="none" transform="rotate(-18 264 179)" />
+      <text x="292" y="166" fontSize="11" fontWeight="800" fill="#1D5F7A" transform="rotate(-18 292 166)">Pool</text>
 
-      {/* buildings */}
-      <path d="M222 206 L298 214 L290 300 L212 288Z" fill="#C8734A" stroke="#A65E3A" strokeWidth="2" strokeLinejoin="round" />
-      <path d="M222 206 L290 300M298 214 L212 288" stroke="#A65E3A" strokeWidth="1.2" opacity=".6" />
-      <text x="255" y="257" fontSize="10.5" fontWeight="800" fill="#FFF6E6" textAnchor="middle">Rooms</text>
-      <path d="M330 192 L425 198 L392 345 L318 322Z" fill="#B8653E" stroke="#8A4A2C" strokeWidth="2" strokeLinejoin="round" />
-      <path d="M377 195 L355 334" stroke="#8A4A2C" strokeWidth="1.2" opacity=".6" />
-      <text x="370" y="270" fontSize="12" fontWeight="800" fill="#FFF6E6" textAnchor="middle" transform="rotate(-77 370 270)">Oasis Lodge</text>
+      {/* buildings (unlabelled) */}
+      <g fill="#B8653E" stroke="#8A4A2C" strokeWidth="2" strokeLinejoin="round">
+        <path d="M182 134 L224 142 L220 162 L178 154Z" />
+        <path d="M107 228 L179 244 L173 275 L104 257Z" />
+        <path d="M232 194 L304 200 L300 248 L228 242Z" />
+        <path d="M386 178 L438 200 L398 348 L343 338Z" />
+      </g>
+      <g stroke="#8A4A2C" strokeWidth="1.2" opacity=".55" fill="none">
+        <path d="M180 144 L222 152M106 242 L176 259M230 218 L302 224M412 189 L370 343" />
+      </g>
 
       {/* pedestrian guest gate on Marine Drive (key required) */}
       <circle className="pulse" cx="383" cy="357" r="11" fill="#2A86A6" opacity=".45" />
@@ -793,8 +799,7 @@ function MapScene() {
         </g>
       </g>
 
-      {/* car route and main gate */}
-      <path d="M-10 270 L118 163" stroke="#E2691F" strokeWidth="3" strokeDasharray="2 7" strokeLinecap="round" fill="none" markerEnd="url(#routeArrow)" />
+      {/* main gate */}
       <circle className="pulse" cx="140" cy="160" r="14" fill="#E2691F" opacity=".55" />
       <g transform="translate(140 160) rotate(-40)">
         <rect x="-15" y="-5" width="30" height="10" rx="3" fill="#F2C94C" stroke="#3B2416" strokeWidth="1.5" />
