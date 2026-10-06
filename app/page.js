@@ -13,9 +13,9 @@ const MAPS = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComp
 
 const NAV = [
   { id: "home", label: "Home" },
-  { id: "amenities", label: "Amenities" },
   { id: "accommodations", label: "Accommodations" },
   { id: "events", label: "Events" },
+  { id: "amenities", label: "Amenities" },
   { id: "explore", label: "Explore" },
   { id: "contact", label: "Contact" },
 ];
@@ -127,7 +127,7 @@ export default function Page() {
 
   return (
     <>
-      <a className="skip" href="#amenities">Skip to content</a>
+      <a className="skip" href="#accommodations">Skip to content</a>
       <div className="progress" aria-hidden="true" />
 
       {/* ---------- Navigation ---------- */}
@@ -225,6 +225,170 @@ export default function Page() {
           </div>
         </section>
 
+        {/* ---------- Accommodations ---------- */}
+        <section className="section accom" id="accommodations">
+          <div className="wrap">
+            <div className="section-head reveal">
+              <h2>Hotel rooms and apartments</h2>
+              <p>
+                Accommodation in Margate for every kind of stay: eight hotel rooms for couples, friends and business travellers, and three apartments with full kitchens for families and
+                longer stays. Mention the room or unit number when you book.
+              </p>
+            </div>
+
+            <details className="drawer reveal">
+              <summary>
+                <span className="drawer-ico ai warm"><Icon name="bed" size={24} /></span>
+                <span className="drawer-text">
+                  <strong>Hotel rooms</strong>
+                  <small>8 rooms in four bed layouts: rooms 1, 3, 4, 5, 6, 7, 8 and 17</small>
+                </span>
+                <span className="drawer-chev" aria-hidden="true"><Icon name="arrow" size={18} /></span>
+              </summary>
+              <div className="drawer-body">
+            <div className="hotel-grid">
+              {HOTEL_ROOMS.map((t, i) => (
+                <article className="rtype" key={t.label}>
+                  <BedRow beds={t.beds} />
+                  <h4>{t.label}</h4>
+                  <p>{t.note}</p>
+                  <ul className="keys" aria-label="Room numbers">
+                    {t.rooms.map((n) => (
+                      <li key={n} className="key"><small>Room</small>{n}</li>
+                    ))}
+                  </ul>
+                  <a
+                    className="room-link"
+                    href={wa(`Hi Oasis Lodge, I'd like to check availability for a hotel room with ${t.label.toLowerCase()} (room ${t.rooms.join(", ")}).`)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    Check availability <Icon name="right" size={18} />
+                  </a>
+                </article>
+              ))}
+            </div>
+
+            <div className="comforts">
+              <h3>Room comforts</h3>
+              {[
+                ["snow", "Air-conditioning"],
+                ["microwave", "Microwave"],
+                ["fridge", "Bar fridge"],
+                ["tv", "DStv-ready TV"],
+                ["wifi", "Free Wi-Fi"],
+              ].map(([ic, label]) => (
+                <span className="comfort" key={label}>
+                  <span><Icon name={ic} size={20} /></span> {label}
+                </span>
+              ))}
+            </div>
+              </div>
+            </details>
+
+            <details className="drawer reveal">
+              <summary>
+                <span className="drawer-ico ai deep"><Icon name="pot" size={24} /></span>
+                <span className="drawer-text">
+                  <strong>Apartments</strong>
+                  <small>Units 10, 11 and 12, each with a full kitchen</small>
+                </span>
+                <span className="drawer-chev" aria-hidden="true"><Icon name="arrow" size={18} /></span>
+              </summary>
+              <div className="drawer-body">
+            <div className="units">
+              {UNITS.map((u, i) => (
+                <article className={`unit u${u.no}`} key={u.no}>
+                  <header className="unit-top">
+                    <span className="unit-no"><small>Unit</small>{u.no}</span>
+                    {u.tag && <span className="unit-tag">{u.tag}</span>}
+                    <span className="unit-meta">{u.meta}</span>
+                  </header>
+                  <div className="unit-body">
+                    <p>{u.summary}</p>
+                    <ul className="bedrooms">
+                      {u.bedrooms.map(([name, beds, note]) => (
+                        <li key={name}>
+                          <span className="br-name">{name}</span>
+                          <span className="br-beds">
+                            <BedRow beds={beds} small />
+                            <span>{bedText(beds)}</span>
+                            {note && <em>{note}</em>}
+                          </span>
+                        </li>
+                      ))}
+                    </ul>
+                    <ul className="tags">{u.features.map((f) => <li key={f}>{f}</li>)}</ul>
+                    <a className="room-link" href={wa(`Hi Oasis Lodge, I'd like to check availability for Unit ${u.no}.`)} target="_blank" rel="noopener noreferrer">
+                      Check Unit {u.no} <Icon name="right" size={18} />
+                    </a>
+                  </div>
+                </article>
+              ))}
+            </div>
+              </div>
+            </details>
+
+            <div className="group-cta reveal">
+              <span className="ai deep"><Icon name="family" size={26} /></span>
+              <div>
+                <h3>Travelling as a big group?</h3>
+                <p>We host large holiday groups across our hotel rooms and apartments. Send us your dates and headcount and we’ll put together the right mix of rooms.</p>
+              </div>
+              <a className="btn btn-primary" href={wa("Hi Oasis Lodge, I'd like to book for a large group.")} target="_blank" rel="noopener noreferrer">
+                Book for a group
+              </a>
+            </div>
+          </div>
+        </section>
+
+        {/* ---------- Events ---------- */}
+        <section className="section events" id="events">
+          <div className="wrap events-grid">
+            <div className="events-copy reveal">
+              <h2>Conferences, meetings and celebrations</h2>
+              <p>
+                Book our conference centre for business meetings and training days, or host your celebration at the lodge. Send us your
+                date, headcount and the meals you need, and we’ll put together a quote.
+              </p>
+              <div className="row">
+                <a className="btn btn-primary" href={wa("Hi Oasis Lodge, I'd like a quote for a conference or event.")} target="_blank" rel="noopener noreferrer">
+                  Get an event quote
+                </a>
+                <a className="btn btn-ghost" href={PHONE_TEL}>Call {PHONE_DISPLAY}</a>
+              </div>
+            </div>
+
+            <ul className="event-list">
+              {[
+                ["present", "Conference centre", "A dedicated venue for business meetings, workshops, training days and presentations, with Wi-Fi."],
+                ["users", "Business meetings", "From a small board meeting to a full-day session, with accommodation on-site for out-of-town delegates."],
+                ["cake", "Parties and milestone events", "Birthdays, anniversaries, graduations, retirements and family reunions, with space for everyone."],
+              ].map(([ic, t, d], i) => (
+                <li className="event reveal" key={t} style={{ transitionDelay: `${i * 0.1}s` }}>
+                  <span className="ei"><Icon name={ic} size={24} /></span>
+                  <div>
+                    <h3>{t}</h3>
+                    <p>{d}</p>
+                  </div>
+                </li>
+              ))}
+              <li className="catering reveal" style={{ transitionDelay: ".3s" }}>
+                <span className="ai warm"><Icon name="pot" size={24} /></span>
+                <div>
+                  <h3>Catering on request</h3>
+                  <p>We can cater breakfast, lunch and/or supper for your meeting or event. Tell us which meals you need when you book. Catering is quoted and paid as an extra to your booking.</p>
+                  <ul className="meals">
+                    <li>Breakfast</li>
+                    <li>Lunch</li>
+                    <li>Supper</li>
+                  </ul>
+                </div>
+              </li>
+            </ul>
+          </div>
+        </section>
+
         {/* ---------- Amenities ---------- */}
         <section className="section amen" id="amenities">
           <div className="wrap">
@@ -293,154 +457,6 @@ export default function Page() {
                 Ask about a wash
               </a>
             </article>
-          </div>
-        </section>
-
-        {/* ---------- Accommodations ---------- */}
-        <section className="section accom" id="accommodations">
-          <div className="wrap">
-            <div className="section-head reveal">
-              <h2>Hotel rooms and apartments</h2>
-              <p>
-                Accommodation in Margate for every kind of stay: eight hotel rooms for couples, friends and business travellers, and three apartments with full kitchens for families and
-                longer stays. Mention the room or unit number when you book.
-              </p>
-            </div>
-
-            <div className="sub-head reveal">
-              <h3>Hotel rooms</h3>
-              <span>8 rooms in four bed layouts</span>
-            </div>
-            <div className="hotel-grid">
-              {HOTEL_ROOMS.map((t, i) => (
-                <article className="rtype reveal" key={t.label} style={{ transitionDelay: `${i * 0.08}s` }}>
-                  <BedRow beds={t.beds} />
-                  <h4>{t.label}</h4>
-                  <p>{t.note}</p>
-                  <ul className="keys" aria-label="Room numbers">
-                    {t.rooms.map((n) => (
-                      <li key={n} className="key"><small>Room</small>{n}</li>
-                    ))}
-                  </ul>
-                  <a
-                    className="room-link"
-                    href={wa(`Hi Oasis Lodge, I'd like to check availability for a hotel room with ${t.label.toLowerCase()} (room ${t.rooms.join(", ")}).`)}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    Check availability <Icon name="right" size={18} />
-                  </a>
-                </article>
-              ))}
-            </div>
-
-            <div className="comforts reveal">
-              <h3>Room comforts</h3>
-              {[
-                ["snow", "Air-conditioning"],
-                ["microwave", "Microwave"],
-                ["fridge", "Bar fridge"],
-                ["tv", "DStv-ready TV"],
-                ["wifi", "Free Wi-Fi"],
-              ].map(([ic, label]) => (
-                <span className="comfort" key={label}>
-                  <span><Icon name={ic} size={20} /></span> {label}
-                </span>
-              ))}
-            </div>
-
-            <div className="sub-head reveal" style={{ marginTop: "clamp(48px,7vw,80px)" }}>
-              <h3>Apartments</h3>
-              <span>3 units with full kitchens</span>
-            </div>
-            <div className="units">
-              {UNITS.map((u, i) => (
-                <article className={`unit u${u.no} reveal`} key={u.no} style={{ transitionDelay: `${i * 0.1}s` }}>
-                  <header className="unit-top">
-                    <span className="unit-no"><small>Unit</small>{u.no}</span>
-                    {u.tag && <span className="unit-tag">{u.tag}</span>}
-                    <span className="unit-meta">{u.meta}</span>
-                  </header>
-                  <div className="unit-body">
-                    <p>{u.summary}</p>
-                    <ul className="bedrooms">
-                      {u.bedrooms.map(([name, beds, note]) => (
-                        <li key={name}>
-                          <span className="br-name">{name}</span>
-                          <span className="br-beds">
-                            <BedRow beds={beds} small />
-                            <span>{bedText(beds)}</span>
-                            {note && <em>{note}</em>}
-                          </span>
-                        </li>
-                      ))}
-                    </ul>
-                    <ul className="tags">{u.features.map((f) => <li key={f}>{f}</li>)}</ul>
-                    <a className="room-link" href={wa(`Hi Oasis Lodge, I'd like to check availability for Unit ${u.no}.`)} target="_blank" rel="noopener noreferrer">
-                      Check Unit {u.no} <Icon name="right" size={18} />
-                    </a>
-                  </div>
-                </article>
-              ))}
-            </div>
-
-            <div className="group-cta reveal">
-              <span className="ai deep"><Icon name="family" size={26} /></span>
-              <div>
-                <h3>Travelling as a big group?</h3>
-                <p>We host large holiday groups across our hotel rooms and apartments. Send us your dates and headcount and we’ll put together the right mix of rooms.</p>
-              </div>
-              <a className="btn btn-primary" href={wa("Hi Oasis Lodge, I'd like to book for a large group.")} target="_blank" rel="noopener noreferrer">
-                Book for a group
-              </a>
-            </div>
-          </div>
-        </section>
-
-        {/* ---------- Events ---------- */}
-        <section className="section events" id="events">
-          <div className="wrap events-grid">
-            <div className="events-copy reveal">
-              <h2>Conferences, meetings and celebrations</h2>
-              <p>
-                Book our conference centre for business meetings and training days, or host your celebration at the lodge. Send us your
-                date, headcount and the meals you need, and we’ll put together a quote.
-              </p>
-              <div className="row">
-                <a className="btn btn-primary" href={wa("Hi Oasis Lodge, I'd like a quote for a conference or event.")} target="_blank" rel="noopener noreferrer">
-                  Get an event quote
-                </a>
-                <a className="btn btn-ghost" href={PHONE_TEL}>Call {PHONE_DISPLAY}</a>
-              </div>
-            </div>
-
-            <ul className="event-list">
-              {[
-                ["present", "Conference centre", "A dedicated venue for business meetings, workshops, training days and presentations, with Wi-Fi."],
-                ["users", "Business meetings", "From a small board meeting to a full-day session, with accommodation on-site for out-of-town delegates."],
-                ["cake", "Parties and milestone events", "Birthdays, anniversaries, graduations, retirements and family reunions, with space for everyone."],
-              ].map(([ic, t, d], i) => (
-                <li className="event reveal" key={t} style={{ transitionDelay: `${i * 0.1}s` }}>
-                  <span className="ei"><Icon name={ic} size={24} /></span>
-                  <div>
-                    <h3>{t}</h3>
-                    <p>{d}</p>
-                  </div>
-                </li>
-              ))}
-              <li className="catering reveal" style={{ transitionDelay: ".3s" }}>
-                <span className="ai warm"><Icon name="pot" size={24} /></span>
-                <div>
-                  <h3>Catering on request</h3>
-                  <p>We can cater breakfast, lunch and/or supper for your meeting or event. Tell us which meals you need when you book. Catering is quoted and paid as an extra to your booking.</p>
-                  <ul className="meals">
-                    <li>Breakfast</li>
-                    <li>Lunch</li>
-                    <li>Supper</li>
-                  </ul>
-                </div>
-              </li>
-            </ul>
           </div>
         </section>
 
@@ -517,13 +533,20 @@ export default function Page() {
         {/* ---------- Mini game ---------- */}
         <section className="section play" id="play" aria-labelledby="play-title">
           <div className="wrap">
-            <div className="section-head reveal">
-              <h2 id="play-title">Palm Dash</h2>
-              <p>Waiting on check-in? Collect every palm tree before the sea creatures catch you.</p>
-            </div>
+            <details className="drawer drawer-dark reveal">
+              <summary>
+                <span className="drawer-ico ai warm" aria-hidden="true">🌴</span>
+                <span className="drawer-text">
+                  <strong id="play-title">Palm Dash</strong>
+                  <small>Waiting on check-in? Collect every palm before the sea creatures catch you.</small>
+                </span>
+                <span className="drawer-play">Play</span>
+                <span className="drawer-chev" aria-hidden="true"><Icon name="arrow" size={18} /></span>
+              </summary>
+              <div className="drawer-body">
             <div className="play-grid">
               <PalmDash />
-              <aside className="how reveal">
+              <aside className="how">
                 <h3>How to play</h3>
                 <ul>
                   <li><b aria-hidden="true">⌨️</b><span>Move with <kbd>↑</kbd> <kbd>↓</kbd> <kbd>←</kbd> <kbd>→</kbd> or <kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd>. On a phone, swipe the board or use the pad.</span></li>
@@ -533,6 +556,8 @@ export default function Page() {
                 </ul>
               </aside>
             </div>
+              </div>
+            </details>
           </div>
         </section>
       </main>
@@ -1760,11 +1785,11 @@ function PalmDash() {
   const mainLabel = running ? "Pause" : status === "paused" ? "Resume" : status === "over" ? "Play again" : "Start";
 
   return (
-    <div className="arcade stone-frame reveal">
+    <div className="arcade stone-frame">
       <div className="arcade-inner">
       <div className="hud" aria-live="polite">
         <div><small>Score</small><strong>{hud.score}</strong></div>
-        <div><small>High score</small><strong>{hud.hi}</strong></div>
+        <div><small>Best</small><strong>{hud.hi}</strong></div>
         <div>
           <small>Lives</small>
           <span className="lives" aria-label={`${hud.lives} lives left`}>
