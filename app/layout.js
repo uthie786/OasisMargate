@@ -424,6 +424,31 @@ kbd{font-family:inherit;font-size:.8rem;font-weight:700;padding:1px 7px;border-r
 .gallery-inner h3{font-size:1.3rem;letter-spacing:-.02em}
 .gallery-inner p{color:rgba(255,236,210,.8);margin-top:4px;max-width:40rem}
 
+/* expandable drawers (rooms, game) */
+.drawer{margin-top:16px;border-radius:24px;background:var(--card);border:1px solid var(--line);overflow:hidden;transition:box-shadow .3s}
+.drawer[open]{box-shadow:var(--shadow)}
+.drawer summary{list-style:none;display:flex;align-items:center;gap:16px;padding:18px 22px;cursor:pointer;-webkit-user-select:none;user-select:none;transition:background .25s}
+.drawer summary::-webkit-details-marker{display:none}
+.drawer summary:hover{background:rgba(226,105,31,.05)}
+.drawer-ico{font-size:1.4rem}
+.drawer-text{flex:1;min-width:0}
+.drawer-text strong{display:block;font-size:1.25rem;letter-spacing:-.02em;color:var(--earth);line-height:1.3}
+.drawer-text small{display:block;margin-top:2px;color:var(--muted);font-size:.9rem;line-height:1.45}
+.drawer-chev{flex:none;width:40px;height:40px;border-radius:50%;display:grid;place-items:center;background:#F4E1C6;color:var(--sunset-d);transform:rotate(180deg);transition:transform .3s}
+.drawer[open] .drawer-chev{transform:none}
+.drawer-body{padding:6px 22px 24px;animation:rise .45s cubic-bezier(.2,.7,.2,1) both}
+.drawer-body .comforts{margin-top:18px}
+.drawer + .group-cta{margin-top:16px}
+.drawer-dark{background:rgba(255,236,210,.06);border-color:rgba(255,236,210,.14)}
+.drawer-dark summary:hover{background:rgba(255,236,210,.05)}
+.drawer-dark .drawer-text strong{color:#FFF3DE}
+.drawer-dark .drawer-text small{color:rgba(255,236,210,.7)}
+.drawer-dark .drawer-chev{background:rgba(255,236,210,.12);color:var(--sun)}
+.drawer-play{flex:none;padding:9px 18px;border-radius:999px;background:var(--sun);color:var(--earth);font-weight:800;font-size:.9rem}
+.drawer[open] .drawer-play{display:none}
+.section.play{padding:clamp(44px,6vw,72px) 0}
+.play .drawer{margin-top:0}
+
 /* logos */
 .badge{display:block;border-radius:50%;flex:none;-webkit-user-select:none;user-select:none}
 .brand .badge{filter:drop-shadow(0 4px 8px rgba(59,36,22,.3))}
@@ -448,10 +473,57 @@ kbd{font-family:inherit;font-size:.8rem;font-weight:700;padding:1px 7px;border-r
 }
 @media (max-width:900px),(pointer:coarse){.dpad{display:grid}}
 @media (max-width:640px){
+  .section{padding:52px 0}
+  .section.play{padding:36px 0}
+  .section-head{margin-bottom:24px}
+  .section-head h2,.events-copy h2{font-size:1.8rem}
+  .section-head p,.events-copy p{font-size:1rem}
+  .hero{padding:100px 0 92px}
+  .hero h1{font-size:2.55rem;margin-top:16px}
+  .hero-sub{font-size:1rem;margin-top:16px}
+  .hero-actions{margin-top:22px}
+  .hero-grid{gap:26px}
+  .quick{margin-top:20px;gap:8px}
+  .quick a{flex:1 1 150px;padding:8px 12px 8px 8px;gap:10px}
+  .qi{width:34px;height:34px}
+  .quick strong{font-size:.9rem}
+  .postcard-wrap{max-width:220px}
+  .postcard{padding:7px 7px 3px;border-width:4px;border-radius:20px}
+  .postcard svg{border-radius:13px}
+  .postcard figcaption{padding:7px 4px 3px;font-size:.74rem}
+  .postcard figcaption strong{font-size:.8rem}
+  .stamp,.float-chip{display:none}
+  .hero-wall{height:62px}
+  .stone-band{height:52px}
+  .footer .stone-band{height:34px;margin-bottom:40px}
+  .amen-grid,.amen-list{gap:14px}
+  .pool{min-height:0;padding:20px;gap:44px}
+  .pool h3{font-size:1.4rem}
+  .pool p{font-size:.92rem;margin-top:6px}
+  .pool-badge{width:44px;height:44px}
+  .amen-item{padding:18px;gap:14px}
+  .amen-item p{font-size:.92rem}
+  .ai{width:46px;height:46px}
+  .carwash{padding:22px;gap:14px;margin-top:14px}
+  .carwash .ai{width:52px;height:52px}
+  .carwash h3{font-size:1.2rem}
+  .event{padding:18px;gap:14px}
+  .catering{padding:18px;gap:14px}
+  .ei{width:48px;height:48px}
+  .event-list{gap:12px}
+  .ex-card{padding:18px}
+  .ex-grid{gap:12px}
+  .drawer summary{padding:14px 16px;gap:12px}
+  .drawer-text strong{font-size:1.08rem}
+  .drawer-text small{font-size:.82rem}
+  .drawer-chev{width:34px;height:34px}
+  .drawer-play{padding:7px 14px;font-size:.84rem}
+  .drawer-body{padding:4px 12px 16px}
+  .rtype{padding:18px}
+  .unit-body{padding:18px}
   .wrap{width:min(1180px,100% - 28px)}
   .rooms{grid-template-columns:1fr}
-  .carwash{grid-template-columns:1fr;padding:28px}
-  .pool{min-height:340px;padding:24px}
+  .carwash{grid-template-columns:1fr}
   .contact-card{padding:26px}
   .hud strong{font-size:1rem}
   .arcade{padding:9px}.arcade-inner{padding:10px}
