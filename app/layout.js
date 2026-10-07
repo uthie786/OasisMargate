@@ -204,7 +204,7 @@ button{font:inherit;cursor:pointer;border:0;background:none;color:inherit}
 @keyframes sway{50%{transform:rotate(1.6deg)}}
 
 /* hero wall */
-.hero-wall{position:absolute;left:0;right:0;bottom:0;z-index:1;height:clamp(78px,9vw,104px)}
+.hero-wall{position:absolute;left:0;right:0;bottom:0;z-index:4;pointer-events:none;height:clamp(78px,9vw,104px)}
 .hero-wall .stone-band{position:absolute;inset:auto 0 0 0;height:100%}
 .plants{position:absolute;left:0;right:0;bottom:calc(100% + 2px);height:0}
 .plants svg{position:absolute;bottom:0;width:clamp(70px,8vw,110px);height:auto}

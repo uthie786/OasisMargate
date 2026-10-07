@@ -175,7 +175,7 @@ export default function HeroToys() {
       W = r.width;
       H = r.height;
       const wallH = wall ? wall.getBoundingClientRect().height : 0;
-      floor = H - wallH * 0.45;
+      floor = H - wallH + 2; // rest on the top of the stone wall
       base = Math.max(24, Math.min(40, W * 0.045));
       bodies.forEach((b, i) => {
         b.rad = base * b.r;
@@ -488,12 +488,14 @@ export default function HeroToys() {
   if (!enabled) return null;
 
   return (
-    <div className="toys" ref={layerRef}>
-      {TOYS.map(({ key, Sprite }, i) => (
-        <div key={key} className={`toy toy-${key}`} ref={(el) => (toyRefs.current[i] = el)} aria-hidden="true">
-          <Sprite />
-        </div>
-      ))}
+    <>
+      <div className="toys" ref={layerRef}>
+        {TOYS.map(({ key, Sprite }, i) => (
+          <div key={key} className={`toy toy-${key}`} ref={(el) => (toyRefs.current[i] = el)} aria-hidden="true">
+            <Sprite />
+          </div>
+        ))}
+      </div>
       {askMotion && (
         <div className="toy-ask" role="dialog" aria-label="Tilt to play">
           <strong>Tilt to play?</strong>
@@ -504,6 +506,6 @@ export default function HeroToys() {
           </div>
         </div>
       )}
-    </div>
+    </>
   );
 }
