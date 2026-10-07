@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import HeroToys from "./HeroToys";
 
 /* ---------- Contact details ---------- */
 const PHONE_DISPLAY = "+27 82 416 7891";
@@ -223,6 +224,8 @@ export default function Page() {
             </div>
             <div className="stone-band" />
           </div>
+
+          <HeroToys />
         </section>
 
         {/* ---------- Accommodations ---------- */}
