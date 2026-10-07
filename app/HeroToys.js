@@ -168,6 +168,7 @@ export default function HeroToys() {
     let sensorSign = 0; // some browsers report accelerationIncludingGravity inverted; calibrated on first reading
     let motionOn = false;
 
+    const seen = new Set();
     let visible = false, raf = 0, last = 0, acc = 0, still = 0;
     let drag = null;
 
@@ -187,8 +188,9 @@ export default function HeroToys() {
         b.el.style.marginLeft = b.el.style.marginTop = `${-b.rad}px`;
         if (first) {
           // drop in from the top, staggered so they tumble into each other
+          // a short, staggered drop onto the wall so they arrive quickly even on a tall phone hero
           b.x = W * b.startX;
-          b.y = b.rad + i * base * 0.6;
+          b.y = Math.max(b.rad, floor - Math.min(H * 0.45, 320) - i * base * 0.9);
           b.vx = (Math.random() - 0.5) * 120;
           b.a = Math.random() * 360;
         } else {
@@ -276,7 +278,9 @@ export default function HeroToys() {
 
     const tick = (now) => {
       raf = 0;
-      const dt = Math.min((now - last) / 1000, 1 / 30);
+      // keep real time even when frames are slow (page load, scrolling on phones), so the toys
+      // don't drop into slow motion; past 100ms (e.g. a long stall) just skip ahead
+      const dt = Math.min((now - last) / 1000, 0.1);
       last = now;
       acc += dt;
       while (acc >= STEP) {
@@ -433,13 +437,16 @@ export default function HeroToys() {
       b.el.addEventListener("pointercancel", onUp);
     });
 
-    /* ---------- lifecycle: only run while the hero is on screen ---------- */
+    /* ---------- lifecycle: only run while the hero (or the section after it) is on screen ---------- */
     measure(true);
     render();
     layer.classList.add("ready");
 
-    const io = new IntersectionObserver(([en]) => {
-      visible = en.isIntersecting;
+    // keep running until the hotel rooms section (the one after the hero) has scrolled past too
+    const next = document.getElementById("accommodations");
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach((en) => (en.isIntersecting ? seen.add(en.target) : seen.delete(en.target)));
+      visible = seen.size > 0;
       if (visible) {
         if (granted) startMotion();
         wake();
@@ -450,6 +457,7 @@ export default function HeroToys() {
       }
     });
     io.observe(hero);
+    if (next) io.observe(next);
 
     const ro = new ResizeObserver(() => {
       measure(false);
