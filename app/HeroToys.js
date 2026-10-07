@@ -153,6 +153,7 @@ export default function HeroToys() {
     const hero = layer && layer.closest(".hero");
     if (!hero) return;
     const wall = hero.querySelector(".hero-wall");
+    const band = wall && wall.querySelector(".stone-band");
 
     const touch = window.matchMedia("(hover: none) and (pointer: coarse)").matches;
     const hasMotion = touch && typeof window.DeviceMotionEvent !== "undefined";
@@ -175,7 +176,9 @@ export default function HeroToys() {
       W = r.width;
       H = r.height;
       const wallH = wall ? wall.getBoundingClientRect().height : 0;
-      floor = H - wallH + 2; // rest on the top of the stone wall
+      // the coping strip (.stone-band::before) pokes up above the wall; rest on top of it
+      const cap = band ? -parseFloat(getComputedStyle(band, "::before").top) || 0 : 0;
+      floor = H - wallH - cap + 1;
       base = Math.max(24, Math.min(40, W * 0.045));
       bodies.forEach((b, i) => {
         b.rad = base * b.r;
