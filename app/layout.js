@@ -204,24 +204,18 @@ button{font:inherit;cursor:pointer;border:0;background:none;color:inherit}
 @keyframes sway{50%{transform:rotate(1.6deg)}}
 
 /* hero wall */
-.hero-wall{position:absolute;left:0;right:0;bottom:0;z-index:4;pointer-events:none;height:clamp(78px,9vw,104px)}
+.hero-wall{position:absolute;left:0;right:0;bottom:0;height:clamp(78px,9vw,104px)}
 .hero-wall .stone-band{position:absolute;inset:auto 0 0 0;height:100%}
-.plants{position:absolute;left:0;right:0;bottom:calc(100% + 2px);height:0}
+.plants{position:absolute;z-index:4;left:0;right:0;bottom:calc(100% + 2px);height:0;pointer-events:none}
 .plants svg{position:absolute;bottom:0;width:clamp(70px,8vw,110px);height:auto}
 
 /* hero beach toys */
 .toys{position:absolute;inset:0;z-index:3;pointer-events:none}
-.toy{position:absolute;left:0;top:0;opacity:0;pointer-events:auto;cursor:grab;touch-action:manipulation;-webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent;will-change:transform;filter:drop-shadow(0 8px 8px rgba(59,36,22,.22))}
+.toy{position:absolute;left:0;top:0;opacity:0;pointer-events:auto;cursor:grab;touch-action:none;-webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent;will-change:transform}
+@media (hover:hover){.toy{filter:drop-shadow(0 8px 8px rgba(59,36,22,.22))}}
 .toy svg{display:block;width:100%;height:100%;pointer-events:none}
 .toy.grab{cursor:grabbing}
 .toys.ready .toy{opacity:1;transition:opacity .4s}
-.toy-ask{position:fixed;z-index:70;left:50%;bottom:max(16px,env(safe-area-inset-bottom));transform:translateX(-50%);width:min(300px,calc(100% - 32px));padding:14px 16px;border-radius:18px;background:rgba(255,251,244,.95);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);border:1px solid rgba(236,212,166,.95);box-shadow:var(--shadow);pointer-events:auto;animation:rise .4s cubic-bezier(.2,.7,.2,1) both}
-.toy-ask strong{display:block;color:var(--earth);font-size:.98rem}
-.toy-ask p{margin-top:2px;font-size:.86rem;color:var(--muted);line-height:1.4}
-.toy-ask div{margin-top:10px;display:flex;gap:8px}
-.toy-ask button{flex:1;min-height:40px;border-radius:999px;font-weight:700;font-size:.88rem}
-.toy-yes{background:linear-gradient(135deg,var(--sunset),var(--ember));color:#fff}
-.toy-no{background:rgba(226,105,31,.1);color:var(--earth)}
 
 /* sections */
 .section{position:relative;padding:clamp(76px,10vw,128px) 0}

@@ -4,29 +4,15 @@ import { useEffect, useRef, useState } from "react";
 
 /* =====================================================================
    Hero beach toys
-   Five little physics sprites that live in the hero. On desktop you can
-   click, drag and throw them. On phones they roll around as you tilt the
-   device (and get knocked about when you shake it). Purely decorative:
-   the loop only runs while the hero is on screen and the toys are moving,
-   and nothing here is needed to use the rest of the site.
+   Five little physics sprites resting on the hero wall. Drag and throw
+   them (mouse or finger), tap one to flick it, and every few seconds one
+   hops on its own. Purely decorative: the loop only runs while the hero is
+   on screen and something is moving, and nothing here is needed to use the
+   rest of the site.
    ===================================================================== */
 
-const STORE_KEY = "oasis-toys-motion"; // "granted" | "declined"
-const GRAVITY = 2200; // px/s² at full tilt
+const GRAVITY = 2200; // px/s²
 const STEP = 1 / 120;
-
-const readStore = () => {
-  try {
-    return localStorage.getItem(STORE_KEY);
-  } catch {
-    return null;
-  }
-};
-const writeStore = (v) => {
-  try {
-    localStorage.setItem(STORE_KEY, v);
-  } catch {}
-};
 
 /* ---------- Sprites (viewBox 0 0 100 100, drawn around a circle) ---------- */
 function BeachBall() {
@@ -138,9 +124,7 @@ const TOYS = [
 export default function HeroToys() {
   const layerRef = useRef(null);
   const toyRefs = useRef([]);
-  const api = useRef(null);
   const [enabled, setEnabled] = useState(false);
-  const [askMotion, setAskMotion] = useState(false);
 
   // Only mount on the client, and never for people who prefer reduced motion.
   useEffect(() => {
@@ -155,22 +139,13 @@ export default function HeroToys() {
     const wall = hero.querySelector(".hero-wall");
     const band = wall && wall.querySelector(".stone-band");
 
-    const touch = window.matchMedia("(hover: none) and (pointer: coarse)").matches;
-    const hasMotion = touch && typeof window.DeviceMotionEvent !== "undefined";
-    const needsPermission = hasMotion && typeof DeviceMotionEvent.requestPermission === "function";
-
     let W = 0, H = 0, floor = 0, base = 40;
     const bodies = TOYS.map((t, i) => ({ ...t, el: toyRefs.current[i], x: 0, y: 0, vx: 0, vy: 0, a: 0, w: 0, rad: 0, inv: 1 }));
-
-    // gravity in screen space (unit = full tilt), smoothed target from sensors
-    const g = { x: 0, y: 1 };
-    const gTarget = { x: 0, y: 1 };
-    let sensorSign = 0; // some browsers report accelerationIncludingGravity inverted; calibrated on first reading
-    let motionOn = false;
 
     const seen = new Set();
     let visible = false, raf = 0, last = 0, acc = 0, still = 0;
     let drag = null;
+    let hopTimer = 0, loadTimer = 0, loaded = false, lastScroll = 0;
 
     const measure = (first) => {
       const r = hero.getBoundingClientRect();
@@ -181,34 +156,27 @@ export default function HeroToys() {
       const cap = band ? -parseFloat(getComputedStyle(band, "::before").top) || 0 : 0;
       floor = H - wallH - cap + 1;
       base = Math.max(24, Math.min(40, W * 0.045));
-      bodies.forEach((b, i) => {
+      bodies.forEach((b) => {
         b.rad = base * b.r;
         b.inv = 1 / (b.rad * b.rad);
         b.el.style.width = b.el.style.height = `${b.rad * 2}px`;
         b.el.style.marginLeft = b.el.style.marginTop = `${-b.rad}px`;
         if (first) {
-          // drop in from the top, staggered so they tumble into each other
-          // a short, staggered drop onto the wall so they arrive quickly even on a tall phone hero
+          // start already resting on the wall, so nothing hangs mid-air while the page loads
           b.x = W * b.startX;
-          b.y = Math.max(b.rad, floor - Math.min(H * 0.45, 320) - i * base * 0.9);
-          b.vx = (Math.random() - 0.5) * 120;
-          b.a = Math.random() * 360;
+          b.a = (Math.random() - 0.5) * 40;
         } else {
           b.x = Math.min(Math.max(b.x, b.rad), W - b.rad);
-          b.y = Math.min(b.y, floor - b.rad);
         }
+        if (first || b.y > floor - b.rad) b.y = floor - b.rad;
       });
     };
 
     const step = (dt) => {
-      g.x += (gTarget.x - g.x) * 0.12;
-      g.y += (gTarget.y - g.y) * 0.12;
-      const gx = g.x * GRAVITY, gy = g.y * GRAVITY;
-
       for (const b of bodies) {
         if (b === drag?.body) continue;
-        b.vx = (b.vx + gx * dt) * 0.9995;
-        b.vy = (b.vy + gy * dt) * 0.9995;
+        b.vx *= 0.9995;
+        b.vy = (b.vy + GRAVITY * dt) * 0.9995;
         b.x += b.vx * dt;
         b.y += b.vy * dt;
         b.a += b.w * dt;
@@ -291,8 +259,7 @@ export default function HeroToys() {
 
       // fall asleep once everything has settled, to save battery
       const moving = drag || bodies.some((b) => Math.abs(b.vx) + Math.abs(b.vy) > 8 || Math.abs(b.w) > 4);
-      const settling = Math.abs(gTarget.x - g.x) + Math.abs(gTarget.y - g.y) > 0.01;
-      still = moving || settling ? 0 : still + 1;
+      still = moving ? 0 : still + 1;
       if (still < 45) raf = requestAnimationFrame(tick);
     };
 
@@ -308,80 +275,48 @@ export default function HeroToys() {
       raf = 0;
     };
 
-    /* ---------- sensors ---------- */
-    const onMotion = (e) => {
-      const ag = e.accelerationIncludingGravity;
-      if (!ag || ag.x == null) return;
-      const angle = ((screen.orientation && screen.orientation.angle) ?? window.orientation ?? 0) * (Math.PI / 180);
-      const c = Math.cos(angle), s = Math.sin(angle);
-      // per spec: upright portrait reads y ≈ +9.8, which is gravity pointing down the screen
-      const x0 = -ag.x / 9.81, y0 = ag.y / 9.81;
-      let sx = c * x0 + s * y0, sy = -s * x0 + c * y0;
-      if (!sensorSign) {
-        // people hold their phone roughly upright to read, so the first strong reading tells us the sign
-        if (Math.abs(sy) < 0.4) return;
-        sensorSign = sy > 0 ? 1 : -1;
-      }
-      sx *= sensorSign;
-      sy *= sensorSign;
-      const len = Math.hypot(sx, sy);
-      if (len > 1) {
-        sx /= len;
-        sy /= len;
-      }
-      const changed = Math.abs(sx - gTarget.x) + Math.abs(sy - gTarget.y) > 0.05;
-      gTarget.x = sx;
-      gTarget.y = sy;
+    const flick = (b, power) => {
+      b.vx += (Math.random() - 0.5) * 2 * 250 * power;
+      b.vy -= (650 + Math.random() * 250) * power;
+      b.w += (Math.random() - 0.5) * 900 * power;
+      wake();
+    };
 
-      // shakes: toys lag behind the phone's motion
-      const a = e.acceleration;
-      let jolt = false;
-      if (a && a.x != null && Math.hypot(a.x, a.y) > 3) {
-        const ax = c * -a.x + s * a.y, ay = -s * -a.x + c * a.y;
-        for (const b of bodies) {
-          b.vx += ax * sensorSign * 8;
-          b.vy += ay * sensorSign * 8;
+    /* ---------- idle hops: every few seconds a resting toy jumps on its own ---------- */
+    const scheduleHop = () => {
+      clearTimeout(hopTimer);
+      hopTimer = 0;
+      if (!visible || !loaded || document.hidden) return;
+      hopTimer = setTimeout(() => {
+        // never animate in the middle of a scroll
+        if (performance.now() - lastScroll > 400) {
+          const resting = bodies.filter((b) => b !== drag?.body && b.y + b.rad > floor - 4 && Math.abs(b.vy) < 20);
+          const b = resting[Math.floor(Math.random() * resting.length)];
+          if (b) flick(b, 0.55 + Math.random() * 0.3);
         }
-        jolt = true;
-      }
-      if (changed || jolt) wake();
+        scheduleHop();
+      }, 2500 + Math.random() * 3500);
     };
-    const startMotion = () => {
-      if (motionOn || !hasMotion) return;
-      motionOn = true;
-      window.addEventListener("devicemotion", onMotion);
-    };
-    const stopMotion = () => {
-      if (!motionOn) return;
-      motionOn = false;
-      window.removeEventListener("devicemotion", onMotion);
-    };
-    let granted = hasMotion && !needsPermission;
+    const onScroll = () => (lastScroll = performance.now());
+    window.addEventListener("scroll", onScroll, { passive: true });
+    const onLoad = () => (loadTimer = setTimeout(() => {
+      loaded = true;
+      scheduleHop();
+    }, 1500));
+    if (document.readyState === "complete") onLoad();
+    else window.addEventListener("load", onLoad, { once: true });
 
-    const requestMotion = () =>
-      DeviceMotionEvent.requestPermission()
-        .then((res) => {
-          granted = res === "granted";
-          writeStore(granted ? "granted" : "declined");
-          if (granted && visible) startMotion();
-        })
-        .catch(() => {});
-
-    /* ---------- pointer: drag on desktop, tap to flick on touch ---------- */
+    /* ---------- pointer: drag and throw (mouse or touch), tap to flick ---------- */
     const local = (e) => {
       const r = hero.getBoundingClientRect();
       return { x: e.clientX - r.left, y: e.clientY - r.top, t: performance.now() };
     };
     const onDown = (e) => {
-      const i = toyRefs.current.indexOf(e.currentTarget);
-      const b = bodies[i];
-      if (!b) return;
-
-      if (e.pointerType !== "mouse") return; // touch is handled on pointerup, so scrolls that start on a toy are left alone
-
+      const b = bodies[toyRefs.current.indexOf(e.currentTarget)];
+      if (!b || drag) return;
       e.preventDefault();
       const p = local(e);
-      drag = { body: b, id: e.pointerId, ox: b.x - p.x, oy: b.y - p.y, last: p, vx: 0, vy: 0 };
+      drag = { body: b, id: e.pointerId, ox: b.x - p.x, oy: b.y - p.y, start: p, last: p, vx: 0, vy: 0, moved: 0 };
       b.vx = b.vy = 0;
       e.currentTarget.setPointerCapture(e.pointerId);
       e.currentTarget.classList.add("grab");
@@ -391,6 +326,7 @@ export default function HeroToys() {
       if (!drag || e.pointerId !== drag.id) return;
       const p = local(e);
       const b = drag.body;
+      drag.moved = Math.max(drag.moved, Math.hypot(p.x - drag.start.x, p.y - drag.start.y));
       const nx = Math.min(Math.max(p.x + drag.ox, b.rad), W - b.rad);
       const ny = Math.min(Math.max(p.y + drag.oy, b.rad), floor - b.rad);
       const dt = Math.max((p.t - drag.last.t) / 1000, 1 / 240);
@@ -403,30 +339,20 @@ export default function HeroToys() {
       drag.last = p;
       wake();
     };
-    const onTap = (e) => {
-      const b = bodies[toyRefs.current.indexOf(e.currentTarget)];
-      if (!b) return;
-      // give it a flick, and offer tilt controls on iOS
-      b.vx += (Math.random() - 0.5) * 500;
-      b.vy -= 650 + Math.random() * 250;
-      b.w += (Math.random() - 0.5) * 900;
-      wake();
-      if (needsPermission && !granted) {
-        const stored = readStore();
-        // already said yes on an earlier visit: this tap is the gesture iOS needs to ask again (usually silently)
-        if (stored === "granted") requestMotion();
-        else if (stored !== "declined") setAskMotion(true);
-      }
-    };
     const onUp = (e) => {
-      if (e.type === "pointerup" && e.pointerType !== "mouse") return onTap(e);
       if (!drag || e.pointerId !== drag.id) return;
       const b = drag.body;
-      const stale = performance.now() - drag.last.t > 80; // held still before letting go
+      const now = performance.now();
+      b.el.classList.remove("grab");
+      if (e.type === "pointerup" && drag.moved < 6 && now - drag.start.t < 250) {
+        drag = null;
+        flick(b, 1); // a quick tap
+        return;
+      }
+      const stale = now - drag.last.t > 80; // held still before letting go
       const cap = 2600;
       b.vx = stale ? 0 : Math.max(-cap, Math.min(cap, drag.vx));
       b.vy = stale ? 0 : Math.max(-cap, Math.min(cap, drag.vy));
-      b.el.classList.remove("grab");
       drag = null;
       wake();
     };
@@ -447,14 +373,9 @@ export default function HeroToys() {
     const io = new IntersectionObserver((entries) => {
       entries.forEach((en) => (en.isIntersecting ? seen.add(en.target) : seen.delete(en.target)));
       visible = seen.size > 0;
-      if (visible) {
-        if (granted) startMotion();
-        wake();
-      } else {
-        sleep();
-        stopMotion();
-        setAskMotion(false);
-      }
+      if (visible) wake();
+      else sleep();
+      scheduleHop();
     });
     io.observe(hero);
     if (next) io.observe(next);
@@ -466,25 +387,21 @@ export default function HeroToys() {
     });
     ro.observe(hero);
 
-    const onVis = () => (document.hidden ? sleep() : wake());
-    document.addEventListener("visibilitychange", onVis);
-
-    api.current = {
-      allow: () => {
-        setAskMotion(false);
-        requestMotion();
-      },
-      decline: () => {
-        setAskMotion(false);
-        writeStore("declined");
-      },
+    const onVis = () => {
+      if (document.hidden) sleep();
+      else wake();
+      scheduleHop();
     };
+    document.addEventListener("visibilitychange", onVis);
 
     return () => {
       sleep();
-      stopMotion();
+      clearTimeout(hopTimer);
+      clearTimeout(loadTimer);
       io.disconnect();
       ro.disconnect();
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("load", onLoad);
       document.removeEventListener("visibilitychange", onVis);
       bodies.forEach((b) => {
         b.el.removeEventListener("pointerdown", onDown);
@@ -492,31 +409,18 @@ export default function HeroToys() {
         b.el.removeEventListener("pointerup", onUp);
         b.el.removeEventListener("pointercancel", onUp);
       });
-      api.current = null;
     };
   }, [enabled]);
 
   if (!enabled) return null;
 
   return (
-    <>
-      <div className="toys" ref={layerRef}>
-        {TOYS.map(({ key, Sprite }, i) => (
-          <div key={key} className={`toy toy-${key}`} ref={(el) => (toyRefs.current[i] = el)} aria-hidden="true">
-            <Sprite />
-          </div>
-        ))}
-      </div>
-      {askMotion && (
-        <div className="toy-ask" role="dialog" aria-label="Tilt to play">
-          <strong>Tilt to play?</strong>
-          <p>Let the beach toys roll around as you tilt your phone.</p>
-          <div>
-            <button type="button" className="toy-yes" onClick={() => api.current?.allow()}>Turn on</button>
-            <button type="button" className="toy-no" onClick={() => api.current?.decline()}>Not now</button>
-          </div>
+    <div className="toys" ref={layerRef}>
+      {TOYS.map(({ key, Sprite }, i) => (
+        <div key={key} className={`toy toy-${key}`} ref={(el) => (toyRefs.current[i] = el)} aria-hidden="true">
+          <Sprite />
         </div>
-      )}
-    </>
+      ))}
+    </div>
   );
 }
